@@ -1,0 +1,59 @@
+const mongoose = require('mongoose');
+
+// Función para obtener la hora actual en formato GMT
+const getCurrentGMTTime = () => {
+	const now = new Date();
+	return now.toISOString(); // Devuelve la hora actual en formato ISO (GMT)
+};
+
+// Definir el esquema de los productos
+const productoSchema = new mongoose.Schema({
+	movcmd: Number,
+	comensal: String,
+	tiempo: String,
+	cantidad: String,
+	producto: String,
+	prepguar: String,
+	observaciones: String,
+	imagen: String,
+	ordenado: {
+		responsable: String,
+		hora: { type: String, default: getCurrentGMTTime }, // Establece la hora por defecto como la hora actual en GMT
+		notificar: { type: Boolean, default: true } // Nuevo campo "notificar" dentro de "ordenado" con valor por defecto true
+	},
+	cocinando: {
+		responsable: String,
+		hora: String,
+		notificar: { type: Boolean, default: false } // Nuevo campo "notificar" dentro de "cocinando" con valor por defecto false
+	},
+	preparado: {
+		responsable: String,
+		hora: String,
+		notificar: { type: Boolean, default: false } // Nuevo campo "notificar" dentro de "preparado" con valor por defecto false
+	},
+	entregado: {
+		responsable: String,
+		hora: String,
+		notificar: { type: Boolean, default: false } // Nuevo campo "notificar" dentro de "entregado" con valor por defecto false
+	}
+});
+
+// Definir el esquema de la comanda
+const comandaSchema = new mongoose.Schema({
+	comanda: Number,
+	caja: String,
+	cuenta: String,
+	ccmo: String,
+	cvecc: String,
+	fecha: String,
+	hora: String,
+	mesa: String,
+	data: [{
+		terminal: String,
+		productos: [productoSchema]
+	}]
+});
+
+// Crear y exportar el modelo de la comanda
+const Comanda = mongoose.model('Comanda', comandaSchema);
+module.exports = Comanda;
