@@ -35,6 +35,10 @@ const productoSchema = new mongoose.Schema({
 		responsable: String,
 		hora: String,
 		notificar: { type: Boolean, default: false } // Nuevo campo "notificar" dentro de "entregado" con valor por defecto false
+	},
+	cancelado: {
+		type: Boolean,
+		default: false
 	}
 });
 
@@ -51,7 +55,11 @@ const comandaSchema = new mongoose.Schema({
 	data: [{
 		terminal: String,
 		productos: [productoSchema]
-	}]
+	}],
+	oculto: {
+		type: Boolean,
+		default: false
+	}
 });
 
 // Crear y exportar el modelo de la comanda

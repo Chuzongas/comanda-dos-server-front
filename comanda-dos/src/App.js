@@ -84,22 +84,23 @@ const App = () => {
 				<Route element={<TokenOptions getToken={getToken} />}>
 					<Route element={
 						<>
-							<Footer tokenOptions={tokenOptions} />
+							<Footer setReload={setReload} reload={reload} tokenOptions={tokenOptions} />
 						</>
 					}>
-						{/* <Route element={<Auth />}> */}
+						<Route element={<Auth />}>
 							<Route exact path='/home' element={
 								<>
 									<Navbar
 										tokenOptions={tokenOptions}
 									/>
 									<Home
+										reload={reload}
 										tokenOptions={tokenOptions}
 										createAlert={createAlert}
 									/>
 								</>
 							} />
-						{/* </Route> */}
+						</Route>
 					</Route>
 				</Route>
 

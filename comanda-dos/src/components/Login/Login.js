@@ -72,6 +72,20 @@ const Login = ({ createAlert }) => {
 			.then(res => {
 				console.log(res.data);
 
+				// ES ADMIN
+				if (res.data.admin) {
+
+					localStorage.setItem("userData", JSON.stringify({
+						terminales: res.data.usuario.terminales,
+						usuario: res.data.usuario.usuario,
+					}))
+
+					localStorage.setItem(NameOfToken, res.data.token)
+					goToHomeAdmin()
+
+					return
+				}
+
 				localStorage.setItem("userData", JSON.stringify({
 					terminales: res.data.usuario.terminales,
 					usuario: res.data.usuario.usuario,
@@ -92,7 +106,7 @@ const Login = ({ createAlert }) => {
 					} else if (Object.keys(err.response.data).length === 0) {
 						createAlert("Nip incorrecto", "bgc-red white")
 					} else {
-						createAlert("Error de conexión", "bgc-red white")
+						createAlert("Nip incorrecto", "bgc-red white")
 					}
 
 			})
@@ -102,22 +116,21 @@ const Login = ({ createAlert }) => {
 		navigate('/pre', { replace: false })
 	}
 
+	const goToHomeAdmin = () => {
+		navigate('/home', { replace: false })
+	}
+
 	return (
 		transitionEnter((style, visible) => (
 			visible &&
 			<animated.div style={style}>
-
-				<div className="container color-gray-2" style={{ fontSize: '20px', position: 'relative' }}>
-					<p className='pointer' onClick={() => navigate("/home", { replace: false })} style={{ display: 'flex', alignItems: 'center', position: 'absolute' }}><i className="ri-arrow-left-s-fill"></i> Regresar</p>
-				</div>
-
 				<Keyboard show={showKeyboard} setShow={setShowKeyboard} editFocused={editFocused} position={keyboardPosition} />
 
 				<div className='container' style={{ display: 'flex', justifyContent: 'center', height: '100vh', alignItems: "center" }}>
 					<div className='cool-shadow my-2 radius' style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', maxWidth: '500px' }}>
 						<div style={{ display: 'flex', flexDirection: 'column', padding: '24px' }}>
 							<Logo style={{ height: '50px' }} />
-							<h3>Utilicé contraseña o el lector de huella</h3>
+							<h3 className='text-center'>Utilicé contraseña</h3>
 							<OutsideClickHandler
 								onOutsideClick={(e) => {
 									if (e.target.className !== undefined) {

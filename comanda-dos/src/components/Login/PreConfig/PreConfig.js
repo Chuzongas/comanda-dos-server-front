@@ -122,7 +122,7 @@ const PreConfig = ({ userDatas = JSON.parse(localStorage.getItem(userData)) || "
 								<p className="chido-span-alone" style={{ marginBottom: '0px' }}>Terminal</p>
 							</div>
 
-							<button onClick={seleccionarPreData} className={`border-blue ${cajaSeleccionada === "" || cajaSeleccionada === undefined ? 'disabled bgc-white color-blue' : 'bgc-blue white'}`}>Confirmar</button>
+							<button onClick={seleccionarPreData} className={`py-1 border-blue ${cajaSeleccionada === "" || cajaSeleccionada === undefined ? 'disabled bgc-white color-blue' : 'bgc-blue white'}`}>Confirmar</button>
 
 						</div>
 

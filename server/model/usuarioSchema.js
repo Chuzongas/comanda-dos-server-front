@@ -3,23 +3,26 @@ const Schema = mongoose.Schema;
 
 // Define el esquema del usuario
 const usuarioSchema = new Schema({
-    usuario: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    clave: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    terminales: {
-        type: [String]
-    },
-    fechaCreacion: {
-        type: Date,
-        default: Date.now
-    }
+	usuario: {
+		type: String,
+		required: true,
+		unique: true
+	},
+	clave: {
+		type: String,
+		required: true,
+		unique: true
+	},
+	admin: {
+		type: Boolean
+	},
+	terminales: {
+		type: [String]
+	},
+	fechaCreacion: {
+		type: Date,
+		default: Date.now
+	}
 });
 
 // Crea el modelo de usuario

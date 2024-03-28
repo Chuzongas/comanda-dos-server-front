@@ -10,30 +10,29 @@ const Footer = ({ tokenOptions, setReload, reload }) => {
 
 	let navigate = useNavigate();
 
+	const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+
+	//10 seg?
+	const rangeValue = 10000;
+
+	const [tiempoTranscurrido, setTiempoTranscurrido] = useState(0);
+
 	const [time, setTime] = useState("");
-	const [seconds, setSeconds] = useState();
 
-	// FECHA
-	const [fecha, setFecha] = useState("");
-
-	// GET TIME
 	useEffect(() => {
-		axios.get('/api/amaDeLlaves/home/hora/sistema')
-			.then(res => {
 
-				setFecha(res.data.message.ttCorte[0].fecha_ini_corte)
+		if (tiempoTranscurrido + 1000 > rangeValue) {
+			setTiempoTranscurrido(0)
+			setReload(reload + 1)
+			return
+		}
 
-				let time = res.data.message.ttCorte[0].Hora_ini_corte
+		setTiempoTranscurrido(tiempoTranscurrido + 1000)
 
-				setSeconds(time)
+	}, [time])
 
-				// calcTime(time)
-			})
-			.catch(err => {
-				console.log(err.response.data)
-			})
 
-	}, [tokenOptions])
 
 	const calcTime = useCallback(() => {
 		let date = new Date()
@@ -52,66 +51,33 @@ const Footer = ({ tokenOptions, setReload, reload }) => {
 		calcTime()
 	}, [calcTime])
 
-	// const calcTime = useCallback((newSeconds) => {
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setCurrentDateTime(new Date());
+		}, 1000);
 
-	// 	let time
+		return () => clearInterval(interval);
+	}, []);
 
-	// 	if (newSeconds == undefined) {
-	// 		time = seconds
-	// 	} else {
-	// 		time = newSeconds
-	// 	}
+	const formatDate = (date) => {
+		return date.toLocaleDateString(undefined, {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+		});
+	};
 
-	// 	let horas = 0
-	// 	let minutos = 0
-	// 	let segundos = 0
-
-	// 	function calcHoras(time) {
-	// 		if (time - 3600 >= 0) {
-	// 			time = time - 3600
-	// 			horas++
-	// 			calcHoras(time)
-	// 		} else {
-	// 			//console.log(horas)
-	// 			calcMinutos(time)
-	// 		}
-	// 	}
-
-	// 	function calcMinutos(time) {
-	// 		if (time - 60 >= 0) {
-	// 			time = time - 60
-	// 			minutos++
-	// 			calcMinutos(time)
-	// 		} else {
-	// 			//console.log(minutos)
-	// 			calcSegundos(time)
-	// 		}
-	// 	}
-
-	// 	function calcSegundos(time) {
-	// 		segundos = time
-	// 		//console.log('segundos', time)
-
-	// 		setTime(horas + ":" + minutos + ":" + segundos)
-	// 	}
-
-	// 	calcHoras(time)
-
-	// 	if (newSeconds !== undefined) {
-	// 		setTimeout(() => {
-	// 			calcTime(newSeconds + 1)
-	// 		}, 1000);
-	// 	} else {
-	// 		setTimeout(() => {
-	// 			calcTime(seconds + 1)
-	// 		}, 1000);
-	// 	}
-
-	// }, [seconds])
+	const formatTime = (date) => {
+		return date.toLocaleTimeString(undefined, {
+			hour: 'numeric',
+			minute: 'numeric',
+			second: 'numeric',
+		});
+	};
 
 	const logout = () => {
 		localStorage.clear();
-		navigate("/amallaves/login", { replace: false });
+		navigate("/login", { replace: false });
 	}
 
 	return (
@@ -134,13 +100,13 @@ const Footer = ({ tokenOptions, setReload, reload }) => {
 
 						}
 						{/* <img className='radius-super strong-shadow' src={defaultcat} alt="gato" style={{ width: '48px', height: '48px', objectFit: 'cover' }} /> */}
-						<span style={{ fontSize: '12px' }}>{JSON.parse(localStorage.getItem("userData"))["nombre"]}</span>
+						<span style={{ fontSize: '12px' }}>{JSON.parse(localStorage.getItem("userData"))["usuario"]}</span>
 						{/* <span>Turno: 2</span>
 			<span>Caja: AB12</span> */}
 						{/* <span>Fecha: 22/11/2022</span> */}
-						<div style={{ width: '100px', display: 'flex', justifyContent: 'center', fontSize: "12px", flexDirection: 'column' }}>
-							<span className="text-center">{fecha.split('-')[2] + '/' + fecha.split('-')[1] + '/' + fecha.split('-')[0]}</span>
-							<span className="text-center">Hora: {time}</span>
+						<div style={{ width: '200px', display: 'flex', justifyContent: 'center', fontSize: "12px", flexDirection: 'column' }}>
+							<span className="text-center">{formatDate(currentDateTime)}</span>
+							<span className="text-center">Hora: {formatTime(currentDateTime)}</span>
 						</div>
 						{/* <Logo onClick={() => goTo()} style={{ height: '30px' }} /> */}
 						<i onClick={logout} style={{ fontSize: '20px' }} className="ri-logout-box-line white pointer"></i>

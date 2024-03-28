@@ -37,28 +37,65 @@ router.post('/login', [
 			return res.status(401).json({ message: "Credenciales incorrectas" })
 		}
 
-		// JWT
-		const payload = {
-			usuario: usuario,
-			data: {},
-			preData: {
-				terminalSeleccionada: false
+		console.log(usuario.admin === true)
+		console.log(usuario.admin === true)
+		console.log(usuario.admin === true)
+		console.log(usuario.admin === true)
+		console.log(usuario.admin === true)
+		console.log(usuario.admin === true)
+		console.log(usuario.admin === true)
+		console.log(usuario.admin === true)
+
+		// CHECK IF ADMIN
+		if (usuario.admin === true) {
+			//SI ES ADMIN
+			// JWT
+			const payload = {
+				usuario: usuario,
+				data: {
+					todasTerminales: true
+				},
+				preData: {
+					terminalSeleccionada: true
+				}
 			}
+
+			jwt.sign(
+				payload,
+				config.get('jwtsecret'), { expiresIn: 86400 }, //24 horas
+				(err, token) => {
+					if (err) throw err;
+					return res.status(200).json({
+						admin:true,
+						token,
+						usuario: usuario
+					})
+				}
+			)
+		} else {
+
+			// NO ES ADMIN
+			// JWT
+			const payload = {
+				usuario: usuario,
+				data: {},
+				preData: {
+					terminalSeleccionada: false
+				}
+			}
+
+			jwt.sign(
+				payload,
+				config.get('jwtsecret'), { expiresIn: 86400 }, //24 horas
+				(err, token) => {
+					if (err) throw err;
+					return res.status(200).json({
+						token,
+						usuario: usuario
+					})
+				}
+			)
 		}
-
-		jwt.sign(
-			payload,
-			config.get('jwtsecret'), { expiresIn: 86400 }, //24 horas
-			(err, token) => {
-				if (err) throw err;
-				return res.status(200).json({
-					token,
-					usuario: usuario
-				})
-			}
-		)
-
-
 	} catch (error) {
 		res.status(500).json({ message: 'Server error' })
 		console.error(error.message)

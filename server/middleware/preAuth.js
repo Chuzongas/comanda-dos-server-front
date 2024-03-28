@@ -11,7 +11,11 @@ module.exports = function (req, res, next) {
 
 		const decode = jwt.verify(token, config.get('jwtsecret'))
 
-		if (decode.preData.terminalSeleccionada === true) {
+		if (decode.usuario.admin === true) {
+			req.userdecode = decode
+			next()
+			return
+		} else if (decode.preData.terminalSeleccionada === true) {
 			return res.status(401).json({ message: 'Ya haz seleccionado tu informacion antes' })
 		}
 

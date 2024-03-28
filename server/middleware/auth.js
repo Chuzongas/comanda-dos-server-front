@@ -10,6 +10,10 @@ module.exports = function (req, res, next) {
 
 		const decode = jwt.verify(token, config.get('jwtsecret'))
 
+		if (decode.preData.terminalSeleccionada === false) {
+			return res.status(401).json({ messange: 'No haz seleccionado terminal' })
+		}
+
 		req.userdecode = decode
 		next()
 

@@ -1,19 +1,68 @@
 const express = require('express');
 const Comanda = require('../model/comandaSchema');
-
+const auth = require('../middleware/auth')
 const router = express.Router();
 
-// Ruta para obtener todas las comandas
-router.get('/all/comandas', async (req, res) => {
-    try {
-        // Buscar todas las comandas
-        const comandas = await Comanda.find();
+// Ruta para obtener comandas por terminal
+router.get('/all/comandas', auth, async (req, res) => {
+	try {
+		let comandas;
 
-        res.json({ comandas: comandas });
-    } catch (error) {
-        // Manejar errores
-        res.status(400).json({ message: error.message });
-    }
+		// if(req.userdecode.usuario.admin === true)
+		// ES ADMIN, DARLE TODO
+		if (req.userdecode.usuario.admin === true) {
+			try {
+				// Encuentra todas las comandas
+				comandas = await Comanda.find();
+				return res.json(comandas);
+			} catch (error) {
+				console.error(error);
+				res.status(500).json({ message: 'Error al obtener las comandas' });
+			}
+		}
+
+		const terminalParam = req.userdecode.data.terminalDatabase.terminal;
+
+		// Encuentra todas las comandas que contienen la terminal especificada
+		comandas = await Comanda.find({
+			'data.terminal': terminalParam
+		});
+
+		// Filtra las terminales dentro de cada comanda para incluir solo la terminal coincidente
+		const comandasFiltradas = comandas.map(comanda => {
+			const dataFiltrada = comanda.data.filter(item => item.terminal === terminalParam);
+			return { ...comanda.toObject(), data: dataFiltrada };
+		});
+
+		// Obtener la fecha actual en formato GMT
+		const fechaActualGMT = new Date();
+
+		// Obtener el valor de horas desde la consulta
+		const horasLimite = 24;
+
+		// Calcular la fecha hace "horasLimite" horas en la zona horaria del servidor
+		const fechaLimite = new Date();
+		fechaLimite.setHours(fechaLimite.getHours() - horasLimite);
+
+		// Filtrar comandas ocultas y creadas hace más de "horasLimite" horas
+		const comandasFiltradasConFecha = comandasFiltradas.filter(comanda => {
+			if (comanda.oculto === true) {
+				// Convertir la hora de ordenado de GMT a la zona horaria del servidor
+				const fechaOrdenadoGMT = new Date(comanda.data[0].productos[0].ordenado.hora);
+				// Calcular la diferencia de tiempo en milisegundos
+				const diferenciaTiempo = fechaActualGMT - fechaOrdenadoGMT;
+				// Convertir las horas límite a milisegundos
+				const horasLimiteEnMilisegundos = horasLimite * 60 * 60 * 1000;
+				return diferenciaTiempo <= horasLimiteEnMilisegundos;
+			}
+			return true; // Mantén las comandas con oculto en false
+		});
+
+		res.json(comandasFiltradasConFecha);
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: 'Error al obtener las comandas' });
+	}
 });
 
 // Ruta para crear una nueva comanda
@@ -145,12 +194,27 @@ router.get('/notificar/comanda', async (req, res) => {
 	}
 });
 
-
 // Ruta para actualizar estatus de un producto en una comanda
-router.put('/actualizar/comanda/:comanda/:terminal/:movcmd', async (req, res) => {
+router.put('/actualizar/comanda/:comanda/:terminal/:movcmd', auth, async (req, res) => {
+
 	const numComanda = req.params.comanda;
 	const terminal = req.params.terminal;
 	const movcmd = req.params.movcmd;
+
+	// VERIFICAR SI NO ES ADMIN ADMINS
+	if (req.userdecode.usuario.admin !== true) {
+
+		// NO ES ADMIN
+
+		// VERIFICAR QUE LA TERMINAL QUE LLEGO SEA TUYA Y ESTES LOGEADO EN ELLA
+		const terminalParam = req.userdecode.data.terminalDatabase.terminal;
+
+		// SI ES LA TERMINAL QUE ESCOGISTE
+		if (terminalParam !== terminal) {
+			return res.status(401).json({ message: 'No tienes esta terminal seleccionada' })
+		}
+	}
+
 
 	try {
 		// Encontrar la comanda que coincida con los parámetros proporcionados
@@ -218,11 +282,120 @@ router.put('/actualizar/comanda/:comanda/:terminal/:movcmd', async (req, res) =>
 	}
 });
 
-// Función para actualizar un estatus específico en un producto
-const actualizarEstatus = (producto, estatus, responsable) => {
+// Ruta para TERMINAR COMANDA
+router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/:hora/:cancelado', async (req, res) => {
+
+	const comanda = req.params.comanda;
+	const cvecc = req.params.cvecc;
+	const movcmd = req.params.movcmd;
+	const mesa = req.params.mesa
+	const responsable = req.params.responsable
+	const fecha = req.params.fecha
+	const hora = req.params.hora
+	const cancelado = req.params.cancelado
+
+	try {
+		// Encontrar la comanda que coincida con los parámetros proporcionados
+		const comandaEncontrada = await Comanda.findOne({
+			'comanda': comanda,
+			'cvecc': cvecc,
+			'data': {
+				$elemMatch: {
+					'productos': {
+						$elemMatch: {
+							'movcmd': movcmd
+						}
+					}
+				}
+			},
+			'mesa': mesa // Incluir la búsqueda por el campo mesa
+		});
+
+		// Verificar si la comanda existe
+		if (!comandaEncontrada) {
+			return res.status(404).json({ message: 'Comanda no encontrada' });
+		}
+
+		// Si cancelado es true, actualizar el campo cancelado del producto y retornar
+		if (cancelado === 'true') {
+			const terminalData = comanda.data.find(data => data.terminal === terminal);
+			if (!terminalData) {
+				return res.status(404).json({ message: 'Terminal no encontrada en la comanda' });
+			}
+
+			const producto = terminalData.productos.find(producto => producto.movcmd == movcmd);
+			if (!producto) {
+				return res.status(404).json({ message: 'Producto no encontrado en la comanda' });
+			}
+
+			producto.cancelado = true;
+			const comandaActualizada = await comanda.save();
+			return res.json(comandaActualizada);
+		}
+
+		// Obtener el producto específico dentro de la comanda
+		let productoEncontrado = null;
+		comandaEncontrada.data.forEach(terminalData => {
+			const producto = terminalData.productos.find(prod => prod.movcmd == movcmd);
+			if (producto) {
+				productoEncontrado = producto;
+			}
+		});
+
+		if (!productoEncontrado) {
+			return res.status(404).json({ message: 'Producto no encontrado en la comanda' });
+		}
+
+		// Actualizar los estatus a entregado
+		actualizarEstatus(productoEncontrado, 'entregado', responsable, fecha, hora);
+		productoEncontrado.entregado.notificar = true;
+
+
+		// Guardar los cambios en la comanda actualizada
+		const comandaActualizada = await comandaEncontrada.save();
+		res.json(comandaActualizada);
+	} catch (error) {
+		// Manejar errores
+		console.error(error)
+		res.status(400).json({ message: error.message });
+	}
+});
+
+const actualizarEstatus = (producto, estatus, responsable, fecha, hora) => {
 	producto[estatus].responsable = responsable;
-	producto[estatus].hora = new Date().toISOString(); // Asigna la hora actual en formato ISO
+	// Formatear la fecha en el formato adecuado (YYYY-MM-DD) para ser interpretada correctamente
+	const partesFecha = fecha.split('-'); // Dividir la fecha en partes
+	const fechaFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`; // Formato: YYYY-MM-DD
+	// Combinar fecha y hora proporcionadas en una cadena de fecha y hora ISO en formato GMT
+	const fechaHoraGMT = new Date(`${fechaFormateada}T${hora}`).toISOString();
+	producto[estatus].hora = fechaHoraGMT; // Asigna la fecha y hora combinadas en formato ISO
 };
+
+
+// Ruta para actualizar el estado de oculto de una comanda
+router.put('/ocultar/comanda/:id', async (req, res) => {
+	const { id } = req.params;
+
+	try {
+		// Buscar la comanda por su ID
+		const comanda = await Comanda.findById(id);
+
+		if (!comanda) {
+			return res.status(404).json({ message: 'Comanda no encontrada' });
+		}
+
+		// Actualizar el valor de oculto a true
+		comanda.oculto = true;
+
+		// Guardar la comanda actualizada en la base de datos
+		await comanda.save();
+
+		return res.status(200).json({ message: 'Estado de oculto actualizado correctamente' });
+	} catch (error) {
+		console.error('Error al actualizar el estado de oculto:', error);
+		return res.status(500).json({ message: 'Error interno del servidor' });
+	}
+});
 
 
 module.exports = router;
