@@ -22,8 +22,10 @@ const Home = ({ tokenOptions, reload }) => {
 	const [centrosDeConsumo, setCentrosDeConsumo] = useState([])
 	const [barrasDeAlimentos, setBarrasDeAlimentos] = useState([])
 
+	// FILTROS
 	const [filtroCentroDeConsumo, setFiltroCentroDeConsumo] = useState('')
 	const [filtroBarraDeAlimentos, setFiltroBarraDeAlimentos] = useState('')
+	const [filtroOculto, setFiltroOculto] = useState(false)
 
 
 	// SPINNER
@@ -230,24 +232,62 @@ const Home = ({ tokenOptions, reload }) => {
 			}).filter(comanda => comanda.data.length > 0); // Eliminar comandas que no tengan elementos en "data" después del filtrado
 		}
 
+		// Aplicar filtro de oculto
+		comandasFiltradasTemp = comandasFiltradasTemp.map(comanda => {
+			// Filtrar los elementos de "data" que coinciden con el filtro de "barraDeAlimentos"
+			const newData = comanda.data.filter(item => item.oculto === filtroOculto);
+			return { ...comanda, data: newData };
+		}).filter(comanda => comanda.data.length > 0); // Eliminar comandas que no tengan elementos en "data" después del filtrado
+
 		// Establecer las comandas filtradas en el estado
 		setComandasFiltradas(comandasFiltradasTemp);
 
-	}, [comandas, filtroCentroDeConsumo, filtroBarraDeAlimentos]);
+	}, [comandas, filtroCentroDeConsumo, filtroBarraDeAlimentos, filtroOculto]);
 
-	const ocultarComanda = (id) => {
+	const ocultarComanda = (comanda, terminal) => {
 
 		setSpinner(true)
 
-		axios.put(`api/comanda/ocultar/comanda/:id`)
+		axios.put(`api/comanda/ocultar/comanda/${comanda._id}/${terminal.terminal}`)
 			.then(res => {
 				setSpinner(false)
 				console.log(res.data)
+				reloadData()
 			})
 			.catch(err => {
 				setSpinner(false)
 				console.log(err)
 			})
+	}
+
+	const checkIfTerminalFullTerminada = (datos) => {
+
+		console.log(datos)
+
+		// CHECK IF YA OCULTO
+		if (datos.oculto === true) return false
+
+		const productos = datos.productos;
+		// Iterar sobre el arreglo de productos
+		for (let j = 0; j < productos.length; j++) {
+			const producto = productos[j];
+
+
+			// RETURN TRUE SI ESTA CANCELADO
+			if (producto.cancelado === true) continue;
+
+
+			// Verificar si alguna de las propiedades hora es undefined
+			if (
+				producto.ordenado.hora === undefined ||
+				producto.cocinando.hora === undefined ||
+				producto.preparado.hora === undefined ||
+				producto.entregado.hora === undefined
+			) {
+				return false // Si al menos una hora es undefined, regresa false
+			}
+		}
+		return true // Si todas las horas están definidas, regresa true
 	}
 
 	return (
@@ -296,6 +336,12 @@ const Home = ({ tokenOptions, reload }) => {
 											</div>
 										</>
 								}
+								<h3 className=' mt-2 text-center'>Ocultos</h3>
+								<div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+									<div onClick={() => { setFiltroOculto(!filtroOculto) }} className={`${filtroOculto ? 'border-blue' : ''} color-gray-2 pointer bgc-white strong-shadow radius`} style={{ display: 'grid', placeContent: 'center', fontSize: '22px', height: '48px', width: '48px' }}>
+										<i className="ri-eye-off-line"></i>
+									</div>
+								</div>
 							</div>
 						</OutsideClickHandler>
 					</animated.div>
@@ -307,7 +353,7 @@ const Home = ({ tokenOptions, reload }) => {
 			<Spinner show={spinner} />
 			<div className="container mt-2">
 				<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-					<h3>{barrasDeAlimentos.length === 1 ? barrasDeAlimentos[0] : 'Monitor de comandas'}</h3>
+					<h3>{barrasDeAlimentos.length === 1 ? barrasDeAlimentos[0] : ''}</h3>
 					{
 						filtroBarraDeAlimentos === '' & filtroCentroDeConsumo === '' ? '' :
 							<>
@@ -316,14 +362,26 @@ const Home = ({ tokenOptions, reload }) => {
 					}
 				</div>
 				{
+					filtroOculto ? <h4 style={{ textAlign: 'right' }}>Viendo: <b>ocultos</b></h4> : ''
+				}
+				{
 					comandasFiltradas.map((item, i) => {
 						return (
 							<Fragment key={i}>
 
 								{
 									item.data.map((terminal, t) => {
+
 										return (
-											<div key={t} className='radius cool-shadow bgc-gray-light mb-3' style={{ border: `2px solid ${VARS_EMPRESAS['RAPPI'].COLOR}` }}>
+											<div key={t} className='radius strong-shadow bgc-gray-light mb-3' style={{ position: 'relative', border: `1px solid ${/*VARS_EMPRESAS['RAPPI'].COLOR*/''}` }}>
+												{
+													checkIfTerminalFullTerminada(terminal) ?
+														<div onClick={() => ocultarComanda(item, terminal)} className='radius-super bgc-gray color-gray-2 strong-shadow pointer' style={{ position: 'absolute', right: '-16px', top: '-16px', fontSize: '16px', display: 'grid', placeContent: 'center', height: '32px', width: '32px' }}>
+															<i className="ri-eye-off-line"></i>
+														</div>
+														:
+														''
+												}
 												<div style={{ borderBottomLeftRadius: '0px', borderBottomRightRadius: '0px' }} className='py-2 px-3 color-gray-2 radius bgc-gray'>
 													<div style={{ display: 'flex', justifyContent: 'space-between' }}>
 														<div style={{ display: 'flex', gap: '30px', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>

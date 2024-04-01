@@ -54,12 +54,12 @@ const comandaSchema = new mongoose.Schema({
 	mesa: String,
 	data: [{
 		terminal: String,
-		productos: [productoSchema]
-	}],
-	oculto: {
-		type: Boolean,
-		default: false
-	}
+		productos: [productoSchema],
+		oculto: {
+			type: Boolean,
+			default: false
+		}
+	}]
 });
 
 // Crear y exportar el modelo de la comanda

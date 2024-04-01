@@ -5,7 +5,7 @@ const Terminal = require('../model/terminalSchema');
 // Ruta para crear datos en el modelo Terminal
 router.post('/crear/terminal', async (req, res) => {
 	try {
-		const { terminal } = req.body;
+		const { terminal, imagen } = req.body;
 
 		// Verificar que los datos sean requeridos
 		if (!terminal) {
@@ -18,7 +18,10 @@ router.post('/crear/terminal', async (req, res) => {
 			return res.status(400).json({ error: "La terminal ya existe" });
 		}
 
-		const newTerminal = new Terminal({ terminal });
+		const newTerminal = new Terminal({
+			terminal,
+			imagen
+		});
 		await newTerminal.save();
 
 		res.status(201).json(newTerminal);

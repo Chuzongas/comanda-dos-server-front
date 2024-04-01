@@ -363,18 +363,25 @@ router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/
 
 const actualizarEstatus = (producto, estatus, responsable, fecha, hora) => {
 	producto[estatus].responsable = responsable;
-	// Formatear la fecha en el formato adecuado (YYYY-MM-DD) para ser interpretada correctamente
-	const partesFecha = fecha.split('-'); // Dividir la fecha en partes
-	const fechaFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`; // Formato: YYYY-MM-DD
-	// Combinar fecha y hora proporcionadas en una cadena de fecha y hora ISO en formato GMT
-	const fechaHoraGMT = new Date(`${fechaFormateada}T${hora}`).toISOString();
-	producto[estatus].hora = fechaHoraGMT; // Asigna la fecha y hora combinadas en formato ISO
+
+	if (fecha === undefined || hora === undefined) {
+		// Si fecha o hora son undefined, calcular la fecha y hora actual en formato ISO
+		const fechaHoraActual = new Date().toISOString();
+		producto[estatus].hora = fechaHoraActual;
+	} else {
+		// Formatear la fecha en el formato adecuado (YYYY-MM-DD) para ser interpretada correctamente
+		const partesFecha = fecha.split('-'); // Dividir la fecha en partes
+		const fechaFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`; // Formato: YYYY-MM-DD
+		// Combinar fecha y hora proporcionadas en una cadena de fecha y hora ISO en formato GMT
+		const fechaHoraGMT = new Date(`${fechaFormateada}T${hora}`).toISOString();
+		producto[estatus].hora = fechaHoraGMT; // Asigna la fecha y hora combinadas en formato ISO
+	}
 };
 
 
 // Ruta para actualizar el estado de oculto de una comanda
-router.put('/ocultar/comanda/:id', async (req, res) => {
-	const { id } = req.params;
+router.put('/ocultar/comanda/:id/:terminal', async (req, res) => {
+	const { id, terminal } = req.params;
 
 	try {
 		// Buscar la comanda por su ID
@@ -384,8 +391,12 @@ router.put('/ocultar/comanda/:id', async (req, res) => {
 			return res.status(404).json({ message: 'Comanda no encontrada' });
 		}
 
+		let terminalIndex = comanda.data.findIndex(item => item.terminal === terminal)
+
+		if (terminalIndex === -1) return res.status(404).json({ message: 'terminal no encontrada' })
+
 		// Actualizar el valor de oculto a true
-		comanda.oculto = true;
+		comanda.data[terminalIndex].oculto = true;
 
 		// Guardar la comanda actualizada en la base de datos
 		await comanda.save();
