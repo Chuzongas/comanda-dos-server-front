@@ -2,6 +2,8 @@ const express = require('express');
 const Comanda = require('../model/comandaSchema');
 const auth = require('../middleware/auth')
 const router = express.Router();
+const CentroConsumo = require('../model/centroConsumoSchema')
+const Terminal = require('../model/terminalSchema')
 
 // Ruta para obtener comandas por terminal
 router.get('/all/comandas', auth, async (req, res) => {
@@ -17,7 +19,7 @@ router.get('/all/comandas', auth, async (req, res) => {
 				return res.json(comandas);
 			} catch (error) {
 				console.error(error);
-				res.status(500).json({ message: 'Error al obtener las comandas' });
+				return res.status(500).json({ message: 'Error al obtener las comandas' });
 			}
 		}
 
@@ -58,10 +60,10 @@ router.get('/all/comandas', auth, async (req, res) => {
 			return true; // Mantén las comandas con oculto en false
 		});
 
-		res.json(comandasFiltradasConFecha);
+		return res.json(comandasFiltradasConFecha);
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({ message: 'Error al obtener las comandas' });
+		return res.status(500).json({ message: 'Error al obtener las comandas' });
 	}
 });
 
@@ -70,6 +72,26 @@ router.post('/crear/comanda', async (req, res) => {
 	try {
 		// Acceder a req.userdecode.usuario para obtener el responsable
 		const responsable = /* req.userdecode.usuario*/ "chuz";
+
+		const centroConsumoExistente = await CentroConsumo.findOne({ centroConsumo: req.body.ccmo })
+
+		if (centroConsumoExistente) {
+			req.body.imagen = centroConsumoExistente.imagen
+		} else {
+			req.body.imagen = undefined
+		}
+
+
+
+		for (let i = 0; i < req.body.data.length; i++) {
+			let terminalEncontrada = await Terminal.findOne({ terminal: req.body.data[i].terminal })
+
+			if (terminalEncontrada) {
+				req.body.data[i].imagen = terminalEncontrada.imagen
+			} else {
+				req.body.data[i].imagen = undefined
+			}
+		}
 
 		// Crear una nueva instancia del modelo Comanda con los datos proporcionados en el cuerpo de la solicitud
 		const nuevaComanda = new Comanda(req.body);
@@ -88,6 +110,7 @@ router.post('/crear/comanda', async (req, res) => {
 		res.status(201).json(comandaGuardada);
 	} catch (error) {
 		// Manejar errores
+		console.log(error);
 		res.status(400).json({ message: error.message });
 	}
 });

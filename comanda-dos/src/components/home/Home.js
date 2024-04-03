@@ -20,7 +20,9 @@ const Home = ({ tokenOptions, reload }) => {
 	const [comandas, setComandas] = useState([])
 	const [comandasFiltradas, setComandasFiltradas] = useState([])
 	const [centrosDeConsumo, setCentrosDeConsumo] = useState([])
+	const [centrosDeConsumoImagenes, setCentrosDeConsumoImagenes] = useState([])
 	const [barrasDeAlimentos, setBarrasDeAlimentos] = useState([])
+	const [barrasDeAlimentosImagenes, setBarrasDeAlimentosImagenes] = useState([])
 
 	// FILTROS
 	const [filtroCentroDeConsumo, setFiltroCentroDeConsumo] = useState('')
@@ -71,24 +73,30 @@ const Home = ({ tokenOptions, reload }) => {
 
 	const getCentrosYBarras = (data) => {
 		let centrosDeConsumo = [];
+		let centrosDeConsumoImagenes = [];
 		let barrasDeAlimentos = [];
+		let barrasDeAlimentosImagenes = [];
 
 		data.forEach((pedido) => {
-			pedido.data.forEach((terminalData) => {
+			pedido.data.forEach((terminalData, i) => {
 				// Verificar si la terminal ya está en barrasDeAlimentos
 				if (!barrasDeAlimentos.includes(terminalData.terminal)) {
 					barrasDeAlimentos.push(terminalData.terminal);
+					barrasDeAlimentosImagenes.push(terminalData.imagen);
 				}
 			});
 
 			// Verificar si el ccmo ya está en centrosDeConsumo
 			if (!centrosDeConsumo.includes(pedido.ccmo)) {
 				centrosDeConsumo.push(pedido.ccmo);
+				centrosDeConsumoImagenes.push(pedido.imagen);
 			}
 		});
 
 		setCentrosDeConsumo(centrosDeConsumo)
+		setCentrosDeConsumoImagenes(centrosDeConsumoImagenes)
 		setBarrasDeAlimentos(barrasDeAlimentos)
+		setBarrasDeAlimentosImagenes(barrasDeAlimentosImagenes)
 	};
 
 
@@ -262,8 +270,6 @@ const Home = ({ tokenOptions, reload }) => {
 
 	const checkIfTerminalFullTerminada = (datos) => {
 
-		console.log(datos)
-
 		// CHECK IF YA OCULTO
 		if (datos.oculto === true) return false
 
@@ -312,8 +318,16 @@ const Home = ({ tokenOptions, reload }) => {
 									{
 										centrosDeConsumo.map((centroConsumo, i) => {
 											return (
-												<div onClick={() => { filterCentroConsumo(centroConsumo) }} key={i} className={`${filtroCentroDeConsumo === centroConsumo ? 'border-blue' : ''} pointer bgc-white strong-shadow radius`} style={{ height: '48px', width: '48px' }}>
-													{centroConsumo}
+												<div onClick={() => { filterCentroConsumo(centroConsumo) }} key={i} className={`${filtroCentroDeConsumo === centroConsumo ? 'border-blue' : ''} pointer bgc-white strong-shadow radius`} style={{ height: '48px', width: '48px', display: 'flex', justifyContent: 'center', alignItems: 'center', flexFlow: 'column', fontSize: '20px' }}>
+													{
+														centrosDeConsumoImagenes[i] !== undefined ?
+															<img src={centrosDeConsumoImagenes[i]} alt="" style={{ width: '100%' }} />
+															:
+															<>
+																<i className="ri-image-fill"></i>
+																<p>{centroConsumo}</p>
+															</>
+													}
 												</div>
 											)
 										})
@@ -328,7 +342,15 @@ const Home = ({ tokenOptions, reload }) => {
 													barrasDeAlimentos.map((barraAlimentos, i) => {
 														return (
 															<div onClick={() => { filterBarraAlimentos(barraAlimentos) }} key={i} className={`${filtroBarraDeAlimentos === barraAlimentos ? 'border-blue' : ''} pointer bgc-white strong-shadow radius`} style={{ height: '48px', width: '48px' }}>
-																{barraAlimentos}
+																{
+																	barrasDeAlimentosImagenes[i] !== undefined ?
+																		<img src={barrasDeAlimentosImagenes[i]} alt="" style={{ width: '100%' }} />
+																		:
+																		<>
+																			<i className="ri-image-fill"></i>
+																			<p>{barraAlimentos}</p>
+																		</>
+																}
 															</div>
 														)
 													})
@@ -389,7 +411,16 @@ const Home = ({ tokenOptions, reload }) => {
 															<p><b>Mesa:</b><br />{item.mesa}</p>
 														</div>
 														<div style={{ display: 'grid', placeContent: 'center' }}>
-															<img src={VARS_EMPRESAS['RAPPI'].LOGO} alt="logo" style={{ height: '32px' }} />
+															{
+																item.imagen !== undefined ?
+																	<img src={item.imagen} alt="logo" style={{ height: '32px' }} />
+																	:
+																	<div style={{ display: 'flex', placeContent: "center", flexFlow: 'column', alignItems: 'center', gap: '5px' }}>
+																		<i style={{ fontSize: '24px' }} className="ri-image-fill"></i>
+																		{item.ccmo}
+																	</div>
+
+															}
 														</div>
 														<div style={{ display: 'flex', gap: '30px', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
 															<p><b>Fecha:</b><br />{item.fecha}</p>
@@ -437,7 +468,12 @@ const Home = ({ tokenOptions, reload }) => {
 																			<Fragment key={p}>
 																				<div className={`my-tabla-row ${producto.cancelado === true ? 'color-red' : ''}`}>
 																					<div>
-																						<img src={img} alt="imagen" className='radius' style={{ height: '32px' }} />
+																						{
+																							producto.imagen !== undefined && producto.imagen !== '' ?
+																								<img src={producto.imagen} alt="prod" className='radius' style={{ height: '32px' }} />
+																								:
+																								<i style={{ fontSize: '20px' }} className="ri-image-fill"></i>
+																						}
 																					</div>
 																					<div>
 																						<p>{producto.tiempo}</p>

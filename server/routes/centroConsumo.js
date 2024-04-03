@@ -13,15 +13,17 @@ router.post('/crear/centroConsumo', async (req, res) => {
 
 		// Verificar si el centro de consumo ya existe
 		const existeCentro = await CentroConsumo.findOne({
-			centroConsumo,
-			imagen
+			centroConsumo
 		});
 		if (existeCentro) {
 			return res.status(400).json({ error: 'El centro de consumo ya existe' });
 		}
 
 		// Crear un nuevo centro de consumo
-		const nuevoCentro = await CentroConsumo.create({ centroConsumo });
+		const nuevoCentro = await CentroConsumo.create({
+			centroConsumo,
+			imagen
+		});
 		res.status(201).json({ mensaje: 'Centro de consumo creado exitosamente', data: nuevoCentro });
 	} catch (error) {
 		res.status(500).json({ error: error.message });

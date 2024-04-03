@@ -47,13 +47,18 @@ const comandaSchema = new mongoose.Schema({
 	comanda: Number,
 	caja: String,
 	cuenta: String,
-	ccmo: String,
+	ccmo: {
+		type: String,
+		ref: 'CentroConsumo'
+	},
 	cvecc: String,
 	fecha: String,
 	hora: String,
+	imagen: String,
 	mesa: String,
 	data: [{
 		terminal: String,
+		imagen: String,
 		productos: [productoSchema],
 		oculto: {
 			type: Boolean,
