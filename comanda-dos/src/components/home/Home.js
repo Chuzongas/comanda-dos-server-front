@@ -411,16 +411,43 @@ const Home = ({ tokenOptions, reload }) => {
 															<p><b>Mesa:</b><br />{item.mesa}</p>
 														</div>
 														<div style={{ display: 'grid', placeContent: 'center' }}>
-															{
-																item.imagen !== undefined ?
-																	<img src={item.imagen} alt="logo" style={{ height: '32px' }} />
-																	:
-																	<div style={{ display: 'flex', placeContent: "center", flexFlow: 'column', alignItems: 'center', gap: '5px' }}>
-																		<i style={{ fontSize: '24px' }} className="ri-image-fill"></i>
-																		{item.ccmo}
-																	</div>
+															<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
+																{
+																	item.imagen !== undefined ?
+																		<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexFlow: 'column' }}>
+																			<img src={item.imagen} alt="logo" style={{ height: '48px' }} />
+																			<p>{item.ccmo}</p>
+																		</div>
+																		:
+																		<div style={{ display: 'flex', placeContent: "center", flexFlow: 'column', alignItems: 'center', gap: '5px' }}>
+																			<i style={{ fontSize: '24px' }} className="ri-image-fill"></i>
+																			{item.ccmo}
+																		</div>
+																}
 
-															}
+																{
+																	JSON.parse(localStorage.getItem("userData"))["terminales"].length === 0 ?
+
+
+																		terminal.imagen !== undefined && terminal.imagen !== "" ?
+																			<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexFlow: 'column' }}>
+																				<img src={terminal.imagen} alt="logo" style={{ height: '48px' }} />
+																				<p>{terminal.terminal}</p>
+																			</div>
+																			:
+																			<div style={{ display: 'flex', placeContent: "center", flexFlow: 'column', alignItems: 'center', gap: '5px' }}>
+																				<i style={{ fontSize: '24px' }} className="ri-image-fill"></i>
+																				<p>{terminal.terminal}</p>
+																			</div>
+																		: ''
+
+
+
+																}
+															</div>
+
+
+
 														</div>
 														<div style={{ display: 'flex', gap: '30px', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
 															<p><b>Fecha:</b><br />{item.fecha}</p>
@@ -470,7 +497,7 @@ const Home = ({ tokenOptions, reload }) => {
 																					<div>
 																						{
 																							producto.imagen !== undefined && producto.imagen !== '' ?
-																								<img src={producto.imagen} alt="prod" className='radius' style={{ height: '32px' }} />
+																								<img src={producto.imagen} alt="prod" className='radius' style={{ height: '64px' }} />
 																								:
 																								<i style={{ fontSize: '20px' }} className="ri-image-fill"></i>
 																						}
@@ -497,27 +524,27 @@ const Home = ({ tokenOptions, reload }) => {
 																							:
 																							<>
 																								<div style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
-																									<div className='radius-super white strong-shadow' style={{ backgroundColor: '#E2E8F0', display: 'grid', placeContent: 'center', height: '30px', width: '30px', fontSize: '14px' }}>
+																									<div className='radius-super white strong-shadow' style={{ backgroundColor: '#E2E8F0', display: 'grid', placeContent: 'center', height: '30px', width: '30px', maxWidth: '30px', maxHeight: '30px', minWidth: '30px', minHeight: '30px', fontSize: '14px' }}>
 																										<img style={{ width: '15px' }} src={Ordenado} alt="" />
 																										{/* <i className="ri-draft-fill"></i> */}
 																									</div>
 																									<span style={{ fontSize: '10px' }}>{getFecha(producto.ordenado)}</span>
 																								</div>
 																								<div onClick={() => { sendCocinando(producto, producto.ordenado.hora, item.comanda, terminal.terminal, producto.movcmd) }} style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
-																									<div className={`${producto.cocinando.hora === undefined ? 'pointer' : ''} radius-super white strong-shadow`} style={{ background: `${producto.cocinando.hora !== undefined ? '#E2E8F0' : '#A5E1BF'}`, display: 'grid', placeContent: 'center', height: '30px', width: '30px', fontSize: '14px' }}>
+																									<div className={`${producto.cocinando.hora === undefined ? 'pointer' : ''} radius-super white strong-shadow`} style={{ background: `${producto.cocinando.hora !== undefined ? '#E2E8F0' : '#A5E1BF'}`, display: 'grid', placeContent: 'center', height: '30px', width: '30px', maxWidth: '30px', maxHeight: '30px', minWidth: '30px', minHeight: '30px', fontSize: '14px' }}>
 																										<img style={{ width: '15px' }} src={Cocinando} alt="" />
 																										{/* <i className="ri-restaurant-2-fill"></i> */}
 																									</div>
 																									<span style={{ fontSize: '10px' }}>{getFecha(producto.cocinando)}</span>
 																								</div>
 																								<div onClick={() => { sendPreparado(producto, producto.cocinando.hora, item.comanda, terminal.terminal, producto.movcmd) }} style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
-																									<div className={` ${producto.cocinando.hora !== undefined && producto.entregado.hora === undefined && producto.preparado.hora === undefined ? 'white pointer' : 'color-gray-2'} radius-super strong-shadow`} style={{ backgroundColor: `${producto.cocinando.hora !== undefined && producto.entregado.hora === undefined && producto.preparado.hora === undefined ? '#97B544' : '#E2E8F0'}`, display: 'grid', placeContent: 'center', height: '30px', width: '30px', fontSize: '14px' }}>
+																									<div className={` ${producto.cocinando.hora !== undefined && producto.entregado.hora === undefined && producto.preparado.hora === undefined ? 'white pointer' : 'color-gray-2'} radius-super strong-shadow`} style={{ backgroundColor: `${producto.cocinando.hora !== undefined && producto.entregado.hora === undefined && producto.preparado.hora === undefined ? '#97B544' : '#E2E8F0'}`, display: 'grid', placeContent: 'center', height: '30px', width: '30px', maxWidth: '30px', maxHeight: '30px', minWidth: '30px', minHeight: '30px', fontSize: '14px' }}>
 																										<i className="ri-alarm-warning-fill"></i>
 																									</div>
 																									<span style={{ fontSize: '10px' }}>{getFecha(producto.preparado)}</span>
 																								</div>
 																								<div style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
-																									<div className={` ${producto.preparado.hora === undefined ? '' : ''} radius-super strong-shadow white`} style={{ backgroundColor: `${producto.preparado.hora !== undefined ? '#419E6A' : '#E2E8F0'}`, display: 'grid', placeContent: 'center', height: '30px', width: '30px', fontSize: '14px' }}>
+																									<div className={` ${producto.preparado.hora === undefined ? '' : ''} radius-super strong-shadow white`} style={{ backgroundColor: `${producto.preparado.hora !== undefined ? '#419E6A' : '#E2E8F0'}`, display: 'grid', placeContent: 'center', height: '30px', width: '30px', maxWidth: '30px', maxHeight: '30px', minWidth: '30px', minHeight: '30px', fontSize: '14px' }}>
 																										{
 																											producto.preparado.hora !== undefined ?
 																												<img style={{ width: '15px' }} src={EntregadoPrendido} alt="" />
