@@ -36,6 +36,11 @@ const productoSchema = new mongoose.Schema({
 		hora: String,
 		notificar: { type: Boolean, default: false } // Nuevo campo "notificar" dentro de "entregado" con valor por defecto false
 	},
+	servido: {
+		responsable: String,
+		hora: String,
+		notificar: { type: Boolean, default: false } // Nuevo campo "notificar" dentro de "entregado" con valor por defecto false
+	},
 	cancelado: {
 		type: Boolean,
 		default: false
@@ -56,6 +61,11 @@ const comandaSchema = new mongoose.Schema({
 	hora: String,
 	imagen: String,
 	mesa: String,
+	cantidadComensales: Number,
+	meseros: [{
+		nombre: String,
+		imagen: String
+	}],
 	data: [{
 		terminal: String,
 		imagen: String,

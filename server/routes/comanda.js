@@ -224,7 +224,10 @@ router.put('/actualizar/comanda/:comanda/:terminal/:movcmd', auth, async (req, r
 	const terminal = req.params.terminal;
 	const movcmd = req.params.movcmd;
 
-	// VERIFICAR SI NO ES ADMIN ADMINS
+	// console.log(req.body)
+	// return
+
+	// VERIFICAR SI NO ES ADMIN
 	if (req.userdecode.usuario.admin !== true) {
 
 		// NO ES ADMIN
@@ -293,6 +296,33 @@ router.put('/actualizar/comanda/:comanda/:terminal/:movcmd', auth, async (req, r
 		if (req.body.entregado) {
 			const { responsable } = req.body.entregado;
 			actualizarEstatus(producto, 'entregado', responsable);
+			producto.entregado.notificar = true;
+
+			let todoTerminado = true
+
+			// VERIFICAR SI TODOS LOS PRODUCTOS TIENEN TODAS LAS HORAS DEFINIDAS PARA OCULTAR DE UNA VEZ
+			for (let i = 0; i < terminalData.productos.length; i++) {
+				// SI AL MENOS UN ESTATUS NO TIENE HORA, NO HACER NADA
+				if (terminalData.productos[i].ordenado.hora === undefined ||
+					terminalData.productos[i].cocinando.hora === undefined ||
+					terminalData.productos[i].preparado.hora === undefined ||
+					terminalData.productos[i].entregado.hora === undefined) {
+
+					todoTerminado = false
+
+					break;
+				}
+			}
+			if (todoTerminado) {
+				// OCULTAR LA COMANDA, TODO TERMINADO
+				terminalData.oculto = true
+			}
+
+		}
+
+		if (req.body.servido) {
+			const { responsable } = req.body.servido;
+			actualizarEstatus(producto, 'servido', responsable);
 			producto.entregado.notificar = true;
 		}
 
@@ -370,8 +400,8 @@ router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/
 		}
 
 		// Actualizar los estatus a entregado
-		actualizarEstatus(productoEncontrado, 'entregado', responsable, fecha, hora);
-		productoEncontrado.entregado.notificar = true;
+		actualizarEstatus(productoEncontrado, 'servido', responsable, fecha, hora);
+		productoEncontrado.servido.notificar = true;
 
 
 		// Guardar los cambios en la comanda actualizada
@@ -381,6 +411,55 @@ router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/
 		// Manejar errores
 		console.error(error)
 		res.status(400).json({ message: error.message });
+	}
+});
+
+// Función para obtener la hora actual en formato GMT
+const getCurrentGMTTime = () => {
+	const now = new Date();
+	return now.toISOString(); // Devuelve la hora actual en formato ISO (GMT)
+};
+
+// Ruta para TERMINAR TODOS LOS PRODUCTOS DE UNA COMANDA (servidos todos)
+router.post('/terminar/todacuenta', async (req, res) => {
+	const { caja, cuenta, cvecc, mesa } = req.body; // Obtener los valores del body
+
+	try {
+		// Buscar las comandas que coincidan con los criterios dados
+		const comandas = await Comanda.find({ caja, cuenta, cvecc, mesa });
+
+		// Si no se encuentran registros
+		if (comandas.length === 0) {
+			return res.status(404).json({ message: 'No se encontraron comandas que coincidan con los criterios proporcionados.' });
+		}
+
+		// Iterar sobre cada comanda
+		for (const comanda of comandas) {
+			for (const data of comanda.data) {
+				// Establecer el campo "oculto" en true
+				data.oculto = true;
+
+				for (const producto of data.productos) {
+					// Definir los campos a actualizar si están vacíos o indefinidos
+					const actualizarCampos = ['cocinando', 'preparado', 'entregado', 'servido'];
+
+					actualizarCampos.forEach((campo) => {
+						if (!producto[campo].hora) { // Si "hora" es undefined o vacío
+							producto[campo].responsable = 'admin';
+							producto[campo].hora = getCurrentGMTTime();
+							producto[campo].notificar = true;
+						}
+					});
+				}
+			}
+			// Guardar los cambios en la comanda actual
+			await comanda.save();
+		}
+
+		res.status(200).json({ message: 'Comandas actualizadas correctamente.' });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: 'Error al actualizar las comandas.' });
 	}
 });
 
