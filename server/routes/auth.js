@@ -38,13 +38,6 @@ router.post('/login', [
 		}
 
 		console.log(usuario.admin === true)
-		console.log(usuario.admin === true)
-		console.log(usuario.admin === true)
-		console.log(usuario.admin === true)
-		console.log(usuario.admin === true)
-		console.log(usuario.admin === true)
-		console.log(usuario.admin === true)
-		console.log(usuario.admin === true)
 
 		// CHECK IF ADMIN
 		if (usuario.admin === true) {
@@ -80,7 +73,7 @@ router.post('/login', [
 				usuario: usuario,
 				data: {},
 				preData: {
-					terminalSeleccionada: false
+					terminalSeleccionada: true
 				}
 			}
 

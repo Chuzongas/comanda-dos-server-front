@@ -113,7 +113,7 @@ const Login = ({ createAlert }) => {
 	}
 
 	const goNextPage = () => {
-		navigate('/pre', { replace: false })
+		navigate('/home', { replace: false })
 	}
 
 	const goToHomeAdmin = () => {

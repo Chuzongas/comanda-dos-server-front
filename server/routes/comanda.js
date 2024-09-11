@@ -10,8 +10,7 @@ router.get('/all/comandas', auth, async (req, res) => {
 	try {
 		let comandas;
 
-		// if(req.userdecode.usuario.admin === true)
-		// ES ADMIN, DARLE TODO
+		// Verificar si el usuario es administrador
 		if (req.userdecode.usuario.admin === true) {
 			try {
 				// Encuentra todas las comandas
@@ -23,16 +22,17 @@ router.get('/all/comandas', auth, async (req, res) => {
 			}
 		}
 
-		const terminalParam = req.userdecode.data.terminalDatabase.terminal;
+		// Obtener el arreglo de terminales del usuario
+		const terminales = req.userdecode.usuario.terminales;
 
-		// Encuentra todas las comandas que contienen la terminal especificada
+		// Encuentra todas las comandas que contienen cualquiera de las terminales especificadas
 		comandas = await Comanda.find({
-			'data.terminal': terminalParam
+			'data.terminal': { $in: terminales }
 		});
 
-		// Filtra las terminales dentro de cada comanda para incluir solo la terminal coincidente
+		// Filtra las terminales dentro de cada comanda para incluir solo las terminales coincidentes
 		const comandasFiltradas = comandas.map(comanda => {
-			const dataFiltrada = comanda.data.filter(item => item.terminal === terminalParam);
+			const dataFiltrada = comanda.data.filter(item => terminales.includes(item.terminal));
 			return { ...comanda.toObject(), data: dataFiltrada };
 		});
 
@@ -126,7 +126,8 @@ router.get('/notificar/comanda', async (req, res) => {
 						{ "ordenado.notificar": true },
 						{ "cocinando.notificar": true },
 						{ "preparado.notificar": true },
-						{ "entregado.notificar": true }
+						{ "entregado.notificar": true },
+						{ "servido.notificar": true }
 					]
 				}
 			}
@@ -203,6 +204,22 @@ router.get('/notificar/comanda', async (req, res) => {
 						});
 						producto.entregado.notificar = false; // Cambiar notificar a false
 					}
+					if (producto.servido.notificar) {
+						resultados.push({
+							comanda: comanda.comanda,
+							caja: comanda.caja,
+							cuenta: comanda.cuenta,
+							cvecc: comanda.cvecc,
+							mesa: comanda.mesa,
+							movcmd: producto.movcmd,
+							estatus: 6,
+							fecha: producto.servido.hora.split('T')[0], // Extraer fecha de hora (formato GMT)
+							hora: producto.servido.hora.split('T')[1].split('.')[0], // Extraer hora de hora (formato GMT)
+							Usuario: producto.servido.responsable, // Obtener el usuario del responsable
+							terminal: terminalData.terminal // Obtener la terminal del producto
+						});
+						producto.servido.notificar = false; // Cambiar notificar a false
+					}
 				});
 			});
 		});
@@ -233,10 +250,10 @@ router.put('/actualizar/comanda/:comanda/:terminal/:movcmd', auth, async (req, r
 		// NO ES ADMIN
 
 		// VERIFICAR QUE LA TERMINAL QUE LLEGO SEA TUYA Y ESTES LOGEADO EN ELLA
-		const terminalParam = req.userdecode.data.terminalDatabase.terminal;
+		const terminales = req.userdecode.usuario.terminales; ///regresa arreglo
 
 		// SI ES LA TERMINAL QUE ESCOGISTE
-		if (terminalParam !== terminal) {
+		if (!terminales.includes(terminal)) { //verifica en arreglo
 			return res.status(401).json({ message: 'No tienes esta terminal seleccionada' })
 		}
 	}

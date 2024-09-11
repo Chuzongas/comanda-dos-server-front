@@ -17,6 +17,9 @@ import Ordenado from '../../img/ordenado.png'
 import comanda from '../../img/comanda.png'
 import mesa from '../../img/mesa.png'
 
+import sonidoUno from '../../sounds/sonidoUno.mp3'
+import sonidoDos from '../../sounds/sonidoDos.mp3'
+
 const Home = ({ tokenOptions, reload }) => {
 
 	// MAIN DATA
@@ -298,24 +301,46 @@ const Home = ({ tokenOptions, reload }) => {
 		return true // Si todas las horas están definidas, regresa true
 	}
 
-	// useEffect(() => {
+	// CHECK IF NUEVA TERMINAL PARA HACER SONIDO
+	useEffect(() => {
+		// Función para verificar si al menos una comanda cumple con la condición
+		const checkCondition = () => {
+			for (let comanda of comandas) {
+				for (let dataItem of comanda.data) {
+					for (let producto of dataItem.productos) {
+						// Verificar si "ordenado" tiene una hora definida
+						const hasOrdenadoTime = producto.ordenado?.hora;
+						// Verificar si los otros estados no tienen hora definida
+						const noOtherTimesDefined =
+							!producto.cocinando?.hora &&
+							!producto.preparado?.hora &&
+							!producto.entregado?.hora &&
+							!producto.servido?.hora;
 
-	// 	for (let i = 0; i < comandasFiltradas.length; i++) {
-	// 		for (let x = 0; x < comandasFiltradas[i].data.length; x++) {
+						// Si se cumple la condición, regresamos true
+						if (hasOrdenadoTime && noOtherTimesDefined) {
+							return true;
+						}
+					}
+				}
+			}
+			return false; // Si ninguna comanda cumple con la condición, regresamos false
+		};
 
-	// 		}
+		// Actualizar el estado según la verificación
+		const result = checkCondition();
 
-	// 	}
-
-	// 	comandasFiltradas.map((item, i) => {
-	// 		item.data.map((terminal, t) => {
-	// 			checkIfTerminalFullTerminada(terminal) ?
-
-
-	// }, [])
+		if(result){
+			new Audio(sonidoUno).play()
+		}
+	}, [comandas]); // Se ejecuta cada vez que las comandas cambian
 
 	return (
 		<>
+
+			{/* SONIDO */}
+				{/* <audio className='sonido' src={sonidoUno}></audio> */}
+			{/* SONIDO */}
 
 			{/* FILTROS */}
 			<div onClick={() => { openFilters() }} className='white bgc-gray-2 radius-super strong-shadow pointer' style={{ display: 'grid', placeContent: 'center', zIndex: '100', height: '46px', width: '46px', fontSize: '26px', position: 'fixed', bottom: '60px', right: '10px' }}>
@@ -447,8 +472,15 @@ const Home = ({ tokenOptions, reload }) => {
 																item.meseros.map((mesero, i) => {
 																	return (
 																		<div key={i} style={{ display: 'flex', height: '100%', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexDirection: 'column' }}>
-																			<div className='radius elevation-shadow' style={{ height: '50px', width: '50px', overflow: 'hidden' }}>
-																				<img style={{ objectFit: 'cover', objectPosition: 'center', height: '100%', width: '100%' }} src={mesero.imagen} alt="" />
+																			<div className={`radius ${mesero.imagen === '' || mesero.imagen === undefined ? '' : 'elevation-shadow'}`} style={{ height: '50px', width: '50px', overflow: 'hidden' }}>
+																				{
+																					mesero.imagen === '' || mesero.imagen === undefined ?
+																						<div className='color-gray-2' style={{ fontSize: '24px', height: '100%', width: '100%', display: 'grid', placeContent: 'center' }}>
+																							<i style={{ fontSize: '24px' }} className="ri-image-fill"></i>
+																						</div>
+																						:
+																						<img style={{ objectFit: 'cover', objectPosition: 'center', height: '100%', width: '100%' }} src={mesero.imagen} alt="" />
+																				}
 																			</div>
 																			<p className='bold'>{mesero.nombre}</p>
 																		</div>
