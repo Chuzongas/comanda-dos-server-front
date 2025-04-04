@@ -330,7 +330,7 @@ const Home = ({ tokenOptions, reload }) => {
 		// Actualizar el estado según la verificación
 		const result = checkCondition();
 
-		if(result){
+		if (result) {
 			new Audio(sonidoUno).play()
 		}
 	}, [comandas]); // Se ejecuta cada vez que las comandas cambian
@@ -339,7 +339,7 @@ const Home = ({ tokenOptions, reload }) => {
 		<>
 
 			{/* SONIDO */}
-				{/* <audio className='sonido' src={sonidoUno}></audio> */}
+			{/* <audio className='sonido' src={sonidoUno}></audio> */}
 			{/* SONIDO */}
 
 			{/* FILTROS */}
@@ -355,8 +355,8 @@ const Home = ({ tokenOptions, reload }) => {
 								setShowFilters(false)
 							}}
 						>
-							<div className='py-2 px-3 radius bgc-gray strong-shadow' style={{ width: '300px' }}>
-								<h3 className='text-center'>Centro <br /> de consumo</h3>
+							<div className='py-2 px-3 radius bgc-gray strong-shadow' style={{ width: '250px' }}>
+								<p className='text-center'>Centro de consumo</p>
 								<div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
 									{
 										centrosDeConsumo.map((centroConsumo, i) => {
@@ -368,7 +368,7 @@ const Home = ({ tokenOptions, reload }) => {
 															:
 															<>
 																<i className="ri-image-fill"></i>
-																<p>{centroConsumo}</p>
+																<p style={{ fontSize: '12px' }}>{centroConsumo}</p>
 															</>
 													}
 												</div>
@@ -379,19 +379,19 @@ const Home = ({ tokenOptions, reload }) => {
 								{
 									barrasDeAlimentos.length === 1 ? '' :
 										<>
-											<h3 className=' mt-2 text-center'>Barra de <br /> alimentos</h3>
+											<p className=' mt-2 text-center'>Barra de alimentos</p>
 											<div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
 												{
 													barrasDeAlimentos.map((barraAlimentos, i) => {
 														return (
-															<div onClick={() => { filterBarraAlimentos(barraAlimentos) }} key={i} className={`${filtroBarraDeAlimentos === barraAlimentos ? 'border-blue' : ''} pointer bgc-white strong-shadow radius`} style={{ height: '48px', width: '48px' }}>
+															<div onClick={() => { filterBarraAlimentos(barraAlimentos) }} key={i} className={`${filtroBarraDeAlimentos === barraAlimentos ? 'border-blue' : ''} pointer bgc-white strong-shadow radius`} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', height: '48px', width: '48px' }}>
 																{
 																	barrasDeAlimentosImagenes[i] !== undefined ?
-																		<img src={barrasDeAlimentosImagenes[i]} alt="" style={{ width: '100%' }} />
+																		<img className='radius' src={barrasDeAlimentosImagenes[i]} alt="" style={{ width: '100%' }} />
 																		:
 																		<>
 																			<i className="ri-image-fill"></i>
-																			<p>{barraAlimentos}</p>
+																			<p style={{ fontSize: '12px' }}>{barraAlimentos}</p>
 																		</>
 																}
 															</div>
@@ -401,7 +401,7 @@ const Home = ({ tokenOptions, reload }) => {
 											</div>
 										</>
 								}
-								<h3 className=' mt-2 text-center'>Ocultos</h3>
+								<p className=' mt-2 text-center'>Ocultos</p>
 								<div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
 									<div onClick={() => { setFiltroOculto(!filtroOculto) }} className={`${filtroOculto ? 'border-blue' : ''} color-gray-2 pointer bgc-white strong-shadow radius`} style={{ display: 'grid', placeContent: 'center', fontSize: '22px', height: '48px', width: '48px' }}>
 										<i className="ri-eye-off-line"></i>
@@ -554,7 +554,7 @@ const Home = ({ tokenOptions, reload }) => {
 																	<p>Producto</p>
 																</div>
 																<div>
-																	<p>Guarnición</p>
+																	<p>Modificador <br/> Preparación</p>
 																</div>
 																{/* <div>
 																	<p>Ordenado</p>
@@ -596,7 +596,7 @@ const Home = ({ tokenOptions, reload }) => {
 																						<p>{producto.producto}</p>
 																					</div>
 																					<div>
-																						<p>{producto.prepguar}</p>
+																						<p>{producto.modificador}<br />{producto.preparacion !== undefined ? ' ' + producto.preparacion : ''}</p>
 																					</div>
 																					{
 																						producto.cancelado === true ?
@@ -667,6 +667,20 @@ const Home = ({ tokenOptions, reload }) => {
 																					<span style={{ transform: 'translateX(100px)' }}>
 																						<b>Notas:</b> {producto.observaciones}
 																					</span>
+																					<div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+																						{
+																							producto.complementos.map((complemento, i) => {
+																								return (
+																									<div key={i} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
+																										<div className='radius' style={{ height: '50px', width: '50px' }}>
+																											<img className='radius' src={complemento.imagen} style={{ objectFit: 'cover', height: '100%', width: '100%' }} alt="" />
+																										</div>
+																										<p style={{}}>{complemento.producto}</p>
+																									</div>
+																								)
+																							})
+																						}
+																					</div>
 																				</div>
 																			</Fragment>
 																		)

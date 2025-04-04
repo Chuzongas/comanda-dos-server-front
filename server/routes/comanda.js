@@ -8,64 +8,60 @@ const Terminal = require('../model/terminalSchema')
 // Ruta para obtener comandas por terminal
 router.get('/all/comandas', auth, async (req, res) => {
 	try {
+		// Obtener la fecha actual
+		const ahora = new Date();
+
+		// Calcular la fecha límite (hace 24 horas)
+		const hace24Horas = new Date(ahora);
+		hace24Horas.setHours(hace24Horas.getHours() - 24);
+
 		let comandas;
 
-		// Verificar si el usuario es administrador
+		// Si el usuario es administrador, obtener todas las comandas
 		if (req.userdecode.usuario.admin === true) {
-			try {
-				// Encuentra todas las comandas
-				comandas = await Comanda.find();
-				return res.json(comandas);
-			} catch (error) {
-				console.error(error);
-				return res.status(500).json({ message: 'Error al obtener las comandas' });
-			}
+			comandas = await Comanda.find();
+		} else {
+			// Obtener las terminales del usuario
+			const terminales = req.userdecode.usuario.terminales;
+
+			// Obtener comandas que contengan las terminales
+			comandas = await Comanda.find({
+				'data.terminal': { $in: terminales },
+			});
 		}
 
-		// Obtener el arreglo de terminales del usuario
-		const terminales = req.userdecode.usuario.terminales;
-
-		// Encuentra todas las comandas que contienen cualquiera de las terminales especificadas
-		comandas = await Comanda.find({
-			'data.terminal': { $in: terminales }
-		});
-
-		// Filtra las terminales dentro de cada comanda para incluir solo las terminales coincidentes
+		// Filtrar las comandas por fecha y hora en las últimas 24 horas
 		const comandasFiltradas = comandas.map(comanda => {
-			const dataFiltrada = comanda.data.filter(item => terminales.includes(item.terminal));
-			return { ...comanda.toObject(), data: dataFiltrada };
-		});
-
-		// Obtener la fecha actual en formato GMT
-		const fechaActualGMT = new Date();
-
-		// Obtener el valor de horas desde la consulta
-		const horasLimite = 24;
-
-		// Calcular la fecha hace "horasLimite" horas en la zona horaria del servidor
-		const fechaLimite = new Date();
-		fechaLimite.setHours(fechaLimite.getHours() - horasLimite);
-
-		// Filtrar comandas ocultas y creadas hace más de "horasLimite" horas
-		const comandasFiltradasConFecha = comandasFiltradas.filter(comanda => {
-			if (comanda.oculto === true) {
-				// Convertir la hora de ordenado de GMT a la zona horaria del servidor
-				const fechaOrdenadoGMT = new Date(comanda.data[0].productos[0].ordenado.hora);
-				// Calcular la diferencia de tiempo en milisegundos
-				const diferenciaTiempo = fechaActualGMT - fechaOrdenadoGMT;
-				// Convertir las horas límite a milisegundos
-				const horasLimiteEnMilisegundos = horasLimite * 60 * 60 * 1000;
-				return diferenciaTiempo <= horasLimiteEnMilisegundos;
+			// Filtra las terminales dentro de cada comanda para incluir solo las terminales coincidentes
+			var dataFiltrada
+			if (req.userdecode.usuario.admin === true) {
+				dataFiltrada = comanda.data
+			} else {
+				dataFiltrada = comanda.data.filter(item => req.userdecode.usuario.terminales.includes(item.terminal));
 			}
-			return true; // Mantén las comandas con oculto en false
-		});
 
-		return res.json(comandasFiltradasConFecha);
+			// Filtrar por la fecha de la comanda
+			const [dia, mes, anio] = comanda.fecha.split('/');
+			const fechaISO = `20${anio}-${mes}-${dia}T${comanda.hora}`;
+			const fechaHoraComanda = new Date(fechaISO);
+
+			// Verificar si la fecha de la comanda está dentro de las últimas 24 horas
+			if (fechaHoraComanda >= hace24Horas && fechaHoraComanda <= ahora) {
+				return { ...comanda.toObject(), data: dataFiltrada };
+			} else {
+				return null; // Si no está dentro del rango, no incluir la comanda
+			}
+		}).filter(comanda => comanda !== null); // Eliminar las comandas que no cumplen los filtros
+
+		// Responder con las comandas filtradas
+		return res.json(comandasFiltradas);
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ message: 'Error al obtener las comandas' });
 	}
 });
+
+
 
 // Ruta para crear una nueva comanda
 router.post('/crear/comanda', async (req, res) => {

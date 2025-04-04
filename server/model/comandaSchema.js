@@ -13,9 +13,18 @@ const productoSchema = new mongoose.Schema({
 	tiempo: String,
 	cantidad: String,
 	producto: String,
-	prepguar: String,
+	preparacion: String,
+	modificador: String,
 	observaciones: String,
 	imagen: String,
+	complementos: [{
+		movcmd: Number,
+		comensal: Number,
+		tiempo: Number,
+		cantidad: Number,
+		producto: String,
+		imagen: String,
+	}],
 	ordenado: {
 		responsable: String,
 		hora: { type: String, default: getCurrentGMTTime }, // Establece la hora por defecto como la hora actual en GMT
