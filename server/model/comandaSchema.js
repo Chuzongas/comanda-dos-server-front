@@ -9,6 +9,8 @@ const getCurrentGMTTime = () => {
 // Definir el esquema de los productos
 const productoSchema = new mongoose.Schema({
 	movcmd: Number,
+	movcmdpkt: Number,
+	nompaquete: String,
 	comensal: String,
 	tiempo: String,
 	cantidad: String,
