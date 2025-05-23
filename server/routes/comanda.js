@@ -386,18 +386,22 @@ router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/
 
 		// Si cancelado es true, actualizar el campo cancelado del producto y retornar
 		if (cancelado === 'true') {
-			const terminalData = comanda.data.find(data => data.terminal === terminal);
-			if (!terminalData) {
-				return res.status(404).json({ message: 'Terminal no encontrada en la comanda' });
-			}
 
-			const producto = terminalData.productos.find(producto => producto.movcmd == movcmd);
+			var producto
+
+			for (const terminal of comandaEncontrada.data) {
+				console.log('----------')
+				console.log(terminal)
+
+				producto = terminal.productos.find(producto => producto.movcmd == movcmd);
+			}
+			
 			if (!producto) {
 				return res.status(404).json({ message: 'Producto no encontrado en la comanda' });
 			}
 
 			producto.cancelado = true;
-			const comandaActualizada = await comanda.save();
+			const comandaActualizada = await comandaEncontrada.save();
 			return res.json(comandaActualizada);
 		}
 
