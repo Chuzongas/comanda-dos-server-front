@@ -317,6 +317,11 @@ router.put('/actualizar/comanda/:comanda/:terminal/:movcmd', auth, async (req, r
 
 			// VERIFICAR SI TODOS LOS PRODUCTOS TIENEN TODAS LAS HORAS DEFINIDAS PARA OCULTAR DE UNA VEZ
 			for (let i = 0; i < terminalData.productos.length; i++) {
+
+				if (terminalData.productos[i].cancelado === true) {
+					continue;
+				}
+
 				// SI AL MENOS UN ESTATUS NO TIENE HORA, NO HACER NADA
 				if (terminalData.productos[i].ordenado.hora === undefined ||
 					terminalData.productos[i].cocinando.hora === undefined ||
@@ -351,7 +356,7 @@ router.put('/actualizar/comanda/:comanda/:terminal/:movcmd', auth, async (req, r
 });
 
 // Ruta para TERMINAR COMANDA
-router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/:hora/:cancelado', async (req, res) => {
+router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/:hora/:cancelada', async (req, res) => {
 
 	const comanda = req.params.comanda;
 	const cvecc = req.params.cvecc;
@@ -360,7 +365,7 @@ router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/
 	const responsable = req.params.responsable
 	const fecha = req.params.fecha
 	const hora = req.params.hora
-	const cancelado = req.params.cancelado
+	const cancelada = req.params.cancelada
 
 	try {
 		// Encontrar la comanda que coincida con los parámetros proporcionados
@@ -384,25 +389,63 @@ router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/
 			return res.status(404).json({ message: 'Comanda no encontrada' });
 		}
 
-		// Si cancelado es true, actualizar el campo cancelado del producto y retornar
-		if (cancelado === 'true') {
+		// Si cancelada es true, actualizar el campo cancelada del producto y retornar
+		if (cancelada === 'true') {
+
+			// TODO, cancelada Si es <- cancelar la cancelacion
 
 			var producto
+			var varTerminal
 
 			for (const terminal of comandaEncontrada.data) {
-				console.log('----------')
-				console.log(terminal)
-
 				producto = terminal.productos.find(producto => producto.movcmd == movcmd);
+				if (producto) {
+					varTerminal = terminal
+				}
 			}
-			
+
 			if (!producto) {
 				return res.status(404).json({ message: 'Producto no encontrado en la comanda' });
 			}
 
-			producto.cancelado = true;
-			const comandaActualizada = await comandaEncontrada.save();
-			return res.json(comandaActualizada);
+			if (producto.cancelado === true) {
+
+				producto.cancelado = false;
+				varTerminal.oculto = false
+			} else {
+				producto.cancelado = true;
+
+				// actualizarEstatus(producto, 'entregado', 'web');
+				// producto.entregado.notificar = true;
+
+				let todoTerminado = true
+
+				// VERIFICAR SI TODOS LOS PRODUCTOS TIENEN TODAS LAS HORAS DEFINIDAS PARA OCULTAR DE UNA VEZ
+				for (let i = 0; i < varTerminal.productos.length; i++) {
+
+					if (varTerminal.productos[i].cancelado === true) {
+						continue;
+					}
+
+					// SI AL MENOS UN ESTATUS NO TIENE HORA, NO HACER NADA
+					if (varTerminal.productos[i].ordenado.hora === undefined ||
+						varTerminal.productos[i].cocinando.hora === undefined ||
+						varTerminal.productos[i].preparado.hora === undefined ||
+						varTerminal.productos[i].entregado.hora === undefined) {
+
+						todoTerminado = false
+
+						break;
+					}
+				}
+				if (todoTerminado) {
+					// OCULTAR LA COMANDA, TODO TERMINADO
+					varTerminal.oculto = true
+				}
+			}
+
+			await comandaEncontrada.save();
+			// return res.json(comandaActualizada);
 		}
 
 		// Obtener el producto específico dentro de la comanda
@@ -419,8 +462,8 @@ router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/
 		}
 
 		// Actualizar los estatus a entregado
-		actualizarEstatus(productoEncontrado, 'servido', responsable, fecha, hora);
-		productoEncontrado.servido.notificar = true;
+		// actualizarEstatus(productoEncontrado, 'servido', responsable, fecha, hora);
+		// productoEncontrado.servido.notificar = true;
 
 
 		// Guardar los cambios en la comanda actualizada

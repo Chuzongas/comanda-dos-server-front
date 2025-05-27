@@ -34,6 +34,7 @@ const Home = ({ tokenOptions, reload }) => {
 	const [filtroCentroDeConsumo, setFiltroCentroDeConsumo] = useState('')
 	const [filtroBarraDeAlimentos, setFiltroBarraDeAlimentos] = useState('')
 	const [filtroOculto, setFiltroOculto] = useState(false)
+	const [filtroCancelados, setFiltroCancelados] = useState(false)
 
 
 	// SPINNER
@@ -270,14 +271,25 @@ const Home = ({ tokenOptions, reload }) => {
 		// Aplicar filtro de oculto
 		comandasFiltradasTemp = comandasFiltradasTemp.map(comanda => {
 			// Filtrar los elementos de "data" que coinciden con el filtro de "barraDeAlimentos"
-			const newData = comanda.data.filter(item => item.oculto === filtroOculto);
+
+			var newData
+
+
+			if (filtroCancelados) {
+				newData = comanda.data.filter(item => {
+					return item.productos.find(producto => producto.cancelado === filtroCancelados)
+				});
+			} else {
+				newData = comanda.data.filter(item => item.oculto === filtroOculto);
+			}
+
 			return { ...comanda, data: newData };
 		}).filter(comanda => comanda.data.length > 0); // Eliminar comandas que no tengan elementos en "data" después del filtrado
 
 		// Establecer las comandas filtradas en el estado
 		setComandasFiltradas(comandasFiltradasTemp);
 
-	}, [comandas, filtroCentroDeConsumo, filtroBarraDeAlimentos, filtroOculto]);
+	}, [comandas, filtroCentroDeConsumo, filtroBarraDeAlimentos, filtroOculto, filtroCancelados]);
 
 	const ocultarComanda = (comanda, terminal) => {
 
@@ -425,8 +437,14 @@ const Home = ({ tokenOptions, reload }) => {
 								}
 								<p className=' mt-2 text-center'>Ocultos</p>
 								<div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-									<div onClick={() => { setFiltroOculto(!filtroOculto) }} className={`${filtroOculto ? 'border-blue' : ''} color-gray-2 pointer bgc-white strong-shadow radius`} style={{ display: 'grid', placeContent: 'center', fontSize: '22px', height: '48px', width: '48px' }}>
+									<div onClick={() => { setFiltroOculto(!filtroOculto); setFiltroCancelados(false) }} className={`${filtroOculto ? 'border-blue' : ''} color-gray-2 pointer bgc-white strong-shadow radius`} style={{ display: 'grid', placeContent: 'center', fontSize: '22px', height: '48px', width: '48px' }}>
 										<i className="ri-eye-off-line"></i>
+									</div>
+								</div>
+								<p className=' mt-2 text-center'>Cancelados</p>
+								<div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+									<div onClick={() => { setFiltroCancelados(!filtroCancelados); setFiltroOculto(false) }} className={`${filtroCancelados ? 'border-blue' : ''} color-gray-2 pointer bgc-white strong-shadow radius`} style={{ display: 'grid', placeContent: 'center', fontSize: '22px', height: '48px', width: '48px' }}>
+										<i className="ri-close-circle-fill"></i>
 									</div>
 								</div>
 							</div>
@@ -444,12 +462,15 @@ const Home = ({ tokenOptions, reload }) => {
 					{
 						filtroBarraDeAlimentos === '' & filtroCentroDeConsumo === '' ? '' :
 							<>
-								<h4>Filtro: {filtroCentroDeConsumo} {filtroBarraDeAlimentos !== '' && filtroCentroDeConsumo !== '' ? '-' : ''} {filtroBarraDeAlimentos} </h4>
+								<h4>Filtro: <b>{filtroCentroDeConsumo} {filtroBarraDeAlimentos !== '' && filtroCentroDeConsumo !== '' ? '-' : ''} {filtroBarraDeAlimentos}</b> </h4>
 							</>
 					}
 				</div>
 				{
 					filtroOculto ? <h4 style={{ textAlign: 'right' }}>Viendo: <b>ocultos</b></h4> : ''
+				}
+				{
+					filtroCancelados ? <h4 style={{ textAlign: 'right' }}>Viendo: <b>cancelados</b></h4> : ''
 				}
 				{
 					comandasFiltradas.map((item, i) => {
