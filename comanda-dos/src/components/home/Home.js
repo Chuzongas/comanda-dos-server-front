@@ -67,18 +67,23 @@ const Home = ({ tokenOptions, reload }) => {
 		axios.get('api/comanda/all/comandas', tokenOptions)
 			.then(res => {
 
-				for (let i = 0; i < res.data.length; i++) {
+				for (let i = 0; i < res.data[0].data.length; i++) {
 
-					const tiposUnicosOrdenados = [...new Set(res.data[i].data[0].productos.map(item => item.movcmdpkt))];
-					const tiposUnicosOrdenadosNombres = [...new Set(res.data[i].data[0].productos.map(item => item.nompaquete))];
-					res.data[i].paquetesExistentes = tiposUnicosOrdenados
-					res.data[i].paquetesExistentesNombres = tiposUnicosOrdenadosNombres
+					var tiposUnicos = res.data[0].data[i].productos.reduce((acc, item) => {
+						if (!acc.some(el => el.movcmdpkt === item.movcmdpkt)) {
+							acc.push({ movcmdpkt: item.movcmdpkt, nompaquete: item.nompaquete });
+						}
+						return acc;
+					}, []);
+
+					res.data[0].tiposUnicosInfo = tiposUnicos
+					console.log(tiposUnicos)
 				}
 
-				// console.log(res.data)
 
 				setSpinner(false)
 				setComandas(res.data)
+				console.log(res.data)
 				setComandasFiltradas(res.data)
 				getCentrosYBarras(res.data)
 			})
@@ -137,6 +142,7 @@ const Home = ({ tokenOptions, reload }) => {
 
 				setSpinner(false)
 				setComandas(res.data)
+				console.log(res.data)
 				setComandasFiltradas(res.data)
 			})
 			.then(err => {
@@ -475,256 +481,256 @@ const Home = ({ tokenOptions, reload }) => {
 				{
 					comandasFiltradas.map((item, i) => {
 						return (
-							item.paquetesExistentes.map((paqueteExistente, y) => {
+							item.tiposUnicosInfo.map((paqueteExistente, y) => {
 								return (
 									<Fragment key={i + y}>
 
 										{
 											item.data.map((terminal, t) => {
-
-												return (
-													<div key={t + y} className='radius strong-shadow bgc-gray-light mb-3 border-gray-2' style={{ position: 'relative' }}>
-														{
-															checkIfTerminalFullTerminada(terminal) ?
-																''
-																// ocultarComanda(item, terminal)
-																:
-																''
-															// <div onClick={() => ocultarComanda(item, terminal)} className='radius-super bgc-gray color-gray-2 strong-shadow pointer' style={{ position: 'absolute', right: '-16px', top: '-16px', fontSize: '16px', display: 'grid', placeContent: 'center', height: '32px', width: '32px' }}>
-															// 	<i className="ri-eye-off-line"></i>
-															// </div>
-															// :
-															// ''
-														}
-														{
-															item.paquetesExistentes[y] !== 0 ?
-																<div className='color-gray-2 py-2' style={{ backgroundColor: '#cad3e0', display: 'grid', placeContent: 'center' }}>
-																	<h2 className='mb-0 bold'>{item.paquetesExistentesNombres[y]}</h2>
-																</div>
-																: ''
-														}
-														<div style={{ borderBottomLeftRadius: '0px', borderBottomRightRadius: '0px' }} className='py-2 px-3 color-gray-2 radius bgc-gray'>
-															<div style={{ display: 'flex', justifyContent: 'space-around' }}>
-																<div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
-																	<div style={{ display: 'flex', height: '100%', justifyContent: 'space-between', gap: '8px', flexDirection: 'column' }}>
-																		<img style={{ height: '32px' }} src={comanda} alt="" />
-																		<p className='bold'>{item.comanda}</p>
+												if (terminal.productos.find(producto => producto.movcmdpkt === paqueteExistente.movcmdpkt)) {
+													return (
+														<div key={t + y + t} className='radius strong-shadow bgc-gray-light mb-3 border-gray-2' style={{ position: 'relative' }}>
+															{
+																checkIfTerminalFullTerminada(terminal) ?
+																	''
+																	// ocultarComanda(item, terminal)
+																	:
+																	''
+																// <div onClick={() => ocultarComanda(item, terminal)} className='radius-super bgc-gray color-gray-2 strong-shadow pointer' style={{ position: 'absolute', right: '-16px', top: '-16px', fontSize: '16px', display: 'grid', placeContent: 'center', height: '32px', width: '32px' }}>
+																// 	<i className="ri-eye-off-line"></i>
+																// </div>
+																// :
+																// ''
+															}
+															{
+																paqueteExistente.movcmdpkt !== 0 ?
+																	<div className='color-gray-2 py-2' style={{ backgroundColor: '#cad3e0', display: 'grid', placeContent: 'center' }}>
+																		<h2 className='mb-0 bold'>{paqueteExistente.nompaquete}</h2>
 																	</div>
-																	<div style={{ display: 'flex', height: '100%', justifyContent: 'space-between', gap: '8px', flexDirection: 'column' }}>
-																		<img style={{ height: '32px' }} src={mesa} alt="" />
-																		<p className='bold'>{item.mesa}</p>
+																	: ''
+															}
+															<div style={{ borderBottomLeftRadius: '0px', borderBottomRightRadius: '0px' }} className='py-2 px-3 color-gray-2 radius bgc-gray'>
+																<div style={{ display: 'flex', justifyContent: 'space-around' }}>
+																	<div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+																		<div style={{ display: 'flex', height: '100%', justifyContent: 'space-between', gap: '8px', flexDirection: 'column' }}>
+																			<img style={{ height: '32px' }} src={comanda} alt="" />
+																			<p className='bold'>{item.comanda}</p>
+																		</div>
+																		<div style={{ display: 'flex', height: '100%', justifyContent: 'space-between', gap: '8px', flexDirection: 'column' }}>
+																			<img style={{ height: '32px' }} src={mesa} alt="" />
+																			<p className='bold'>{item.mesa}</p>
+																		</div>
+																		<div style={{ display: 'flex', height: '100%', justifyContent: 'space-between', gap: '8px', flexDirection: 'column' }}>
+																			<i style={{ fontSize: '28px' }} className="ri-user-3-fill"></i>
+																			<p className='bold'>{item.cantidadComensales}</p>
+																		</div>
 																	</div>
-																	<div style={{ display: 'flex', height: '100%', justifyContent: 'space-between', gap: '8px', flexDirection: 'column' }}>
-																		<i style={{ fontSize: '28px' }} className="ri-user-3-fill"></i>
-																		<p className='bold'>{item.cantidadComensales}</p>
-																	</div>
-																</div>
-																<div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
-																	{
-																		item.meseros.map((mesero, i) => {
-																			return (
-																				<div key={i + y} style={{ display: 'flex', height: '100%', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexDirection: 'column' }}>
-																					<div className={`radius ${mesero.imagen === '' || mesero.imagen === undefined ? '' : 'elevation-shadow'}`} style={{ height: '50px', width: '50px', overflow: 'hidden' }}>
-																						{
-																							mesero.imagen === '' || mesero.imagen === undefined ?
-																								<div className='color-gray-2' style={{ fontSize: '24px', height: '100%', width: '100%', display: 'grid', placeContent: 'center' }}>
-																									<i style={{ fontSize: '24px' }} className="ri-image-fill"></i>
-																								</div>
-																								:
-																								<img style={{ objectFit: 'cover', objectPosition: 'center', height: '100%', width: '100%' }} src={mesero.imagen} alt="" />
-																						}
+																	<div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+																		{
+																			item.meseros.map((mesero, i) => {
+																				return (
+																					<div key={i + y + t} style={{ display: 'flex', height: '100%', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexDirection: 'column' }}>
+																						<div className={`radius ${mesero.imagen === '' || mesero.imagen === undefined ? '' : 'elevation-shadow'}`} style={{ height: '50px', width: '50px', overflow: 'hidden' }}>
+																							{
+																								mesero.imagen === '' || mesero.imagen === undefined ?
+																									<div className='color-gray-2' style={{ fontSize: '24px', height: '100%', width: '100%', display: 'grid', placeContent: 'center' }}>
+																										<i style={{ fontSize: '24px' }} className="ri-image-fill"></i>
+																									</div>
+																									:
+																									<img style={{ objectFit: 'cover', objectPosition: 'center', height: '100%', width: '100%' }} src={mesero.imagen} alt="" />
+																							}
+																						</div>
+																						<p className='bold'>{mesero.nombre}</p>
 																					</div>
-																					<p className='bold'>{mesero.nombre}</p>
-																				</div>
-																			)
-																		})
-																	}
-																</div>
-																<div style={{ display: 'grid', placeContent: 'center' }}>
-																	<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
-																		{
-																			item.imagen !== undefined ?
-																				<div className='radius elevation-shadow' style={{ overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', flexFlow: 'column' }}>
-																					<img src={item.imagen} alt="logo" style={{ height: '48px' }} />
-																					{/* <p>{item.ccmo}</p> */}
-																				</div>
-																				:
-																				<div className='radius' style={{ overflow: 'hidden', display: 'flex', placeContent: "center", flexFlow: 'column', alignItems: 'center' }}>
-																					<i style={{ fontSize: '24px' }} className="ri-image-fill"></i>
-																					{item.ccmo}
-																				</div>
+																				)
+																			})
 																		}
-
-																		{
-																			JSON.parse(localStorage.getItem("userData"))["terminales"].length === 0 ?
-
-
-																				terminal.imagen !== undefined && terminal.imagen !== "" ?
+																	</div>
+																	<div style={{ display: 'grid', placeContent: 'center' }}>
+																		<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
+																			{
+																				item.imagen !== undefined ?
 																					<div className='radius elevation-shadow' style={{ overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', flexFlow: 'column' }}>
-																						<img src={terminal.imagen} alt="logo" style={{ height: '48px' }} />
-																						{/* <p>{terminal.terminal}</p> */}
+																						<img src={item.imagen} alt="logo" style={{ height: '48px' }} />
+																						{/* <p>{item.ccmo}</p> */}
 																					</div>
 																					:
 																					<div className='radius' style={{ overflow: 'hidden', display: 'flex', placeContent: "center", flexFlow: 'column', alignItems: 'center' }}>
 																						<i style={{ fontSize: '24px' }} className="ri-image-fill"></i>
-																						<p>{terminal.terminal}</p>
+																						{item.ccmo}
 																					</div>
-																				: ''
+																			}
+
+																			{
+																				JSON.parse(localStorage.getItem("userData"))["terminales"].length === 0 ?
+
+
+																					terminal.imagen !== undefined && terminal.imagen !== "" ?
+																						<div className='radius elevation-shadow' style={{ overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', flexFlow: 'column' }}>
+																							<img src={terminal.imagen} alt="logo" style={{ height: '48px' }} />
+																							{/* <p>{terminal.terminal}</p> */}
+																						</div>
+																						:
+																						<div className='radius' style={{ overflow: 'hidden', display: 'flex', placeContent: "center", flexFlow: 'column', alignItems: 'center' }}>
+																							<i style={{ fontSize: '24px' }} className="ri-image-fill"></i>
+																							<p>{terminal.terminal}</p>
+																						</div>
+																					: ''
 
 
 
-																		}
+																			}
+																		</div>
+
+
+
 																	</div>
-
-
-
-																</div>
-																<div style={{ display: 'flex', gap: '24px', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
-																	<p><b>Fecha:</b><br />{item.fecha}</p>
-																	<p><b>Hora:</b><br />{item.hora}</p>
+																	<div style={{ display: 'flex', gap: '24px', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+																		<p><b>Fecha:</b><br />{item.fecha}</p>
+																		<p><b>Hora:</b><br />{item.hora}</p>
+																	</div>
 																</div>
 															</div>
-														</div>
-														<hr className='m-0' style={{ backgroundColor: '#999999' }} />
-														<div className='radius'>
-															<div>
-																<div style={{ display: 'flex', flexDirection: 'column', height: '100%' }} className='my-tabla nice-shadow p-1'>
-																	<div className='my-tabla-header'>
-																		<div>
-																			<p></p>
-																		</div>
-																		<div>
-																			<p>Tiempo</p>
-																		</div>
-																		<div>
-																			<p>Comensal</p>
-																		</div>
-																		<div>
-																			<p>Cantidad</p>
-																		</div>
-																		<div>
-																			<p>Producto</p>
-																		</div>
-																		<div>
-																			<p>Modificador <br /> Preparación</p>
-																		</div>
-																		{/* <div>
+															<hr className='m-0' style={{ backgroundColor: '#999999' }} />
+															<div className='radius'>
+																<div>
+																	<div style={{ display: 'flex', flexDirection: 'column', height: '100%' }} className='my-tabla nice-shadow p-1'>
+																		<div className='my-tabla-header'>
+																			<div>
+																				<p></p>
+																			</div>
+																			<div>
+																				<p>Tiempo</p>
+																			</div>
+																			<div>
+																				<p>Comensal</p>
+																			</div>
+																			<div>
+																				<p>Cantidad</p>
+																			</div>
+																			<div>
+																				<p>Producto</p>
+																			</div>
+																			<div>
+																				<p>Modificador <br /> Preparación</p>
+																			</div>
+																			{/* <div>
 																	<p>Ordenado</p>
 																</div> */}
-																		<div>
-																			<p>Cocinando</p>
+																			<div>
+																				<p>Cocinando</p>
+																			</div>
+																			<div>
+																				<p>Preparado</p>
+																			</div>
+																			<div>
+																				<p>Entregado</p>
+																			</div>
 																		</div>
-																		<div>
-																			<p>Preparado</p>
-																		</div>
-																		<div>
-																			<p>Entregado</p>
-																		</div>
-																	</div>
-																	<div style={{ flex: '1', overflow: 'overlay' }} className='my-tabla-body'>
-																		{
-																			terminal.productos.map((producto, p) => {
+																		<div style={{ flex: '1', overflow: 'overlay' }} className='my-tabla-body'>
+																			{
+																				terminal.productos.map((producto, p) => {
 
-																				if (parseInt(producto.movcmdpkt) === parseInt(paqueteExistente)) {
+																					if (parseInt(producto.movcmdpkt) === parseInt(paqueteExistente.movcmdpkt)) {
 
-																					return (
-																						<Fragment key={p + y}>
-																							<div className={`my-tabla-row ${producto.cancelado === true ? 'color-red' : ''}`}>
-																								<div>
-																									{
-																										producto.imagen !== undefined && producto.imagen !== '' ?
-																											<img src={producto.imagen} alt="prod" className='radius' style={{ height: '64px' }} />
-																											:
-																											<i style={{ fontSize: '20px' }} className="ri-image-fill"></i>
-																									}
-																								</div>
-																								<div>
-																									<p>{producto?.tiempo.toString() === '5' ? 'Para llevar' : producto?.tiempo}</p>
-																								</div>
-																								<div>
-																									<p>{producto.comensal}</p>
-																								</div>
-																								<div>
-																									<p>{producto.cantidad}</p>
-																								</div>
-																								{/* <div>
+																						return (
+																							<Fragment key={p + y + i}>
+																								<div className={`my-tabla-row ${producto.cancelado === true ? 'color-red' : ''}`}>
+																									<div>
+																										{
+																											producto.imagen !== undefined && producto.imagen !== '' ?
+																												<img src={producto.imagen} alt="prod" className='radius' style={{ height: '64px' }} />
+																												:
+																												<i style={{ fontSize: '20px' }} className="ri-image-fill"></i>
+																										}
+																									</div>
+																									<div>
+																										<p>{producto?.tiempo.toString() === '5' ? 'Para llevar' : producto?.tiempo}</p>
+																									</div>
+																									<div>
+																										<p>{producto.comensal}</p>
+																									</div>
+																									<div>
+																										<p>{producto.cantidad}</p>
+																									</div>
+																									{/* <div>
 																									<p>{producto.movcmdpkt} paq</p>
 																								</div> */}
-																								<div>
-																									<p>{producto.producto}</p>
-																								</div>
-																								<div>
+																									<div>
+																										<p>{producto.producto}</p>
+																									</div>
+																									<div>
+																										{
+																											producto.modificador.map(mod => {
+																												return (
+																													<>
+																														<p>{mod}</p>
+																													</>
+																												)
+																											})
+																										}
+																										{
+																											producto.preparacion.map(prep => {
+																												return (
+																													<>
+																														<p>{prep}</p>
+																													</>
+																												)
+																											})
+																										}
+																									</div>
 																									{
-																										producto.modificador.map(mod => {
-																											return (
-																												<>
-																													<p>{mod}</p>
-																												</>
-																											)
-																										})
-																									}
-																									{
-																										producto.preparacion.map(prep => {
-																											return (
-																												<>
-																													<p>{prep}</p>
-																												</>
-																											)
-																										})
-																									}
-																								</div>
-																								{
-																									producto.cancelado === true ?
-																										<Fragment key={i}>
-																											<div style={{ flexGrow: '4', fontSize: '18px', fontWeight: 'bold' }}>
-																												<p>Cancelado</p>
-																											</div>
-																										</Fragment>
-																										:
-																										<>
-																											{/* <div style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
+																										producto.cancelado === true ?
+																											<Fragment key={i + y + p + t}>
+																												<div style={{ flexGrow: '4', fontSize: '18px', fontWeight: 'bold' }}>
+																													<p>Cancelado</p>
+																												</div>
+																											</Fragment>
+																											:
+																											<>
+																												{/* <div style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
 																									<div className='radius-super white strong-shadow' style={{ backgroundColor: '#E2E8F0', display: 'grid', placeContent: 'center', height: '30px', width: '30px', maxWidth: '30px', maxHeight: '30px', minWidth: '30px', minHeight: '30px', fontSize: '14px' }}>
 																										<img style={{ width: '15px' }} src={Ordenado} alt="" />
 																									</div>
 																									<span style={{ fontSize: '10px' }}>{getFecha(producto.ordenado)}</span>
 																								</div> */}
-																											<div onClick={() => { sendCocinando(producto, producto.ordenado.hora, item.comanda, terminal.terminal, producto.movcmd) }} style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
-																												<div className={`
+																												<div onClick={() => { sendCocinando(producto, producto.ordenado.hora, item.comanda, terminal.terminal, producto.movcmd) }} style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
+																													<div className={`
 																										${producto.cocinando.hora === undefined ? 'pointer' : ''} 
 																										${producto.preparado.hora === undefined && producto.cocinando.hora !== undefined ? 'border-gray-2' : ''}
 																										radius-super white strong-shadow`} style={{ background: `${producto.cocinando.hora !== undefined ? '#E2E8F0' : '#A5E1BF'}`, display: 'grid', placeContent: 'center', height: '30px', width: '30px', maxWidth: '30px', maxHeight: '30px', minWidth: '30px', minHeight: '30px', fontSize: '14px' }}>
-																													<img style={{ width: '15px' }} src={Cocinando} alt="" />
-																													{/* <i className="ri-restaurant-2-fill"></i> */}
+																														<img style={{ width: '15px' }} src={Cocinando} alt="" />
+																														{/* <i className="ri-restaurant-2-fill"></i> */}
+																													</div>
+																													<span style={{ fontSize: '10px' }}>{getFecha(producto.cocinando)}</span>
 																												</div>
-																												<span style={{ fontSize: '10px' }}>{getFecha(producto.cocinando)}</span>
-																											</div>
-																											<div onClick={() => { sendPreparado(producto, producto.cocinando.hora, item.comanda, terminal.terminal, producto.movcmd) }} style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
-																												<div className={` 
+																												<div onClick={() => { sendPreparado(producto, producto.cocinando.hora, item.comanda, terminal.terminal, producto.movcmd) }} style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
+																													<div className={` 
 																										${producto.cocinando.hora !== undefined && producto.entregado.hora === undefined && producto.preparado.hora === undefined ? 'white pointer' : 'color-gray-2'} 
 																										${producto.entregado.hora === undefined && producto.preparado.hora !== undefined ? 'border-gray-2' : ''}
 																										radius-super strong-shadow`}
-																													style={{
-																														backgroundColor: `${producto.cocinando.hora !== undefined && producto.entregado.hora === undefined && producto.preparado.hora === undefined ? '#97B544' : '#E2E8F0'}`,
-																														display: 'grid', placeContent: 'center', height: '30px', width: '30px', maxWidth: '30px', maxHeight: '30px', minWidth: '30px', minHeight: '30px', fontSize: '14px'
-																													}}>
-																													<i className="ri-alarm-warning-fill"></i>
+																														style={{
+																															backgroundColor: `${producto.cocinando.hora !== undefined && producto.entregado.hora === undefined && producto.preparado.hora === undefined ? '#97B544' : '#E2E8F0'}`,
+																															display: 'grid', placeContent: 'center', height: '30px', width: '30px', maxWidth: '30px', maxHeight: '30px', minWidth: '30px', minHeight: '30px', fontSize: '14px'
+																														}}>
+																														<i className="ri-alarm-warning-fill"></i>
+																													</div>
+																													<span style={{ fontSize: '10px' }}>{getFecha(producto.preparado)}</span>
 																												</div>
-																												<span style={{ fontSize: '10px' }}>{getFecha(producto.preparado)}</span>
-																											</div>
-																											<div onClick={() => { sendEntregado(producto, producto.preparado.hora, item.comanda, terminal.terminal, producto.movcmd) }} style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
-																												<div className={`
+																												<div onClick={() => { sendEntregado(producto, producto.preparado.hora, item.comanda, terminal.terminal, producto.movcmd) }} style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
+																													<div className={`
 																										${producto.preparado.hora !== undefined ? 'pointer' : 'color-gray-2'} 
 																										${producto.entregado.hora !== undefined ? 'border-gray-2' : ''}
 																										radius-super strong-shadow`}
-																													style={{
-																														backgroundColor: `${producto.preparado.hora !== undefined && producto.entregado.hora === undefined ? '#419E6A'/*<- verde*/ : '#E2E8F0'}`,
-																														display: 'grid', placeContent: 'center', height: '30px', width: '30px', maxWidth: '30px', maxHeight: '30px', minWidth: '30px', minHeight: '30px', fontSize: '16px'
-																													}}>
-																													<i style={{ transform: 'translateY(0px)' }} className="ri-check-line"></i>
+																														style={{
+																															backgroundColor: `${producto.preparado.hora !== undefined && producto.entregado.hora === undefined ? '#419E6A'/*<- verde*/ : '#E2E8F0'}`,
+																															display: 'grid', placeContent: 'center', height: '30px', width: '30px', maxWidth: '30px', maxHeight: '30px', minWidth: '30px', minHeight: '30px', fontSize: '16px'
+																														}}>
+																														<i style={{ transform: 'translateY(0px)' }} className="ri-check-line"></i>
+																													</div>
+																													<span style={{ fontSize: '10px' }}>{getFecha(producto.entregado)}</span>
 																												</div>
-																												<span style={{ fontSize: '10px' }}>{getFecha(producto.entregado)}</span>
-																											</div>
-																											{/* <div style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
+																												{/* <div style={{ display: 'flex', flexFlow: 'column', justifyContent: 'center', alignItems: 'center' }}>
 																									<div className={` ${producto.preparado.hora === undefined ? '' : ''} radius-super strong-shadow white`} style={{ backgroundColor: `${producto.preparado.hora !== undefined ? '#419E6A' : '#E2E8F0'}`, display: 'grid', placeContent: 'center', height: '30px', width: '30px', maxWidth: '30px', maxHeight: '30px', minWidth: '30px', minHeight: '30px', fontSize: '14px' }}>
 																										{
 																											producto.preparado.hora !== undefined ?
@@ -735,42 +741,45 @@ const Home = ({ tokenOptions, reload }) => {
 																									</div>
 																									<span style={{ fontSize: '10px' }}>{getFecha(producto.entregado)}</span>
 																								</div> */}
-																										</>
-																								}
-																							</div>
-																							<div className='notas bgc-gray radius' style={{ borderTopLeftRadius: '0px', borderTopRightRadius: '0px' }}>
-																								<span style={{ transform: 'translateX(100px)' }}>
-																									<b>Notas:</b> {producto.observaciones}
-																								</span>
-																								<div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-																									{
-																										producto.complementos.map((complemento, i) => {
-																											return (
-																												<div key={i} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
-																													<div className='radius' style={{ height: '50px', width: '50px' }}>
-																														<img className='radius' src={complemento.imagen} style={{ objectFit: 'cover', height: '100%', width: '100%' }} alt="" />
-																													</div>
-																													<p style={{}}>{complemento.producto} - Cantidad:{complemento.cantidad}</p>
-																												</div>
-																											)
-																										})
+																											</>
 																									}
 																								</div>
-																							</div>
-																						</Fragment>
-																					)
-																				} else {
-																					return ("")
-																				}
+																								<div className='notas bgc-gray radius' style={{ borderTopLeftRadius: '0px', borderTopRightRadius: '0px' }}>
+																									<span style={{ transform: 'translateX(100px)' }}>
+																										<b>Notas:</b> {producto.observaciones}
+																									</span>
+																									<div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+																										{
+																											producto.complementos.map((complemento, i) => {
+																												return (
+																													<div key={y + i + p + t} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '16px' }}>
+																														<div className='radius' style={{ height: '50px', width: '50px' }}>
+																															<img className='radius' src={complemento.imagen} style={{ objectFit: 'cover', height: '100%', width: '100%' }} alt="" />
+																														</div>
+																														<p style={{}}>{complemento.producto} - Cantidad:{complemento.cantidad}</p>
+																													</div>
+																												)
+																											})
+																										}
+																									</div>
+																								</div>
+																							</Fragment>
+																						)
+																					} else {
+																						return ("")
+																					}
 
-																			})
-																		}
+																				})
+																			}
+																		</div>
 																	</div>
 																</div>
 															</div>
 														</div>
-													</div>
-												)
+													)
+												} else {
+													return ('')
+												}
 											})
 										}
 

@@ -1,14 +1,14 @@
 const mongoose = require('mongoose')
 
-const URI = 'mongodb://0.0.0.0:27017/ephyr-database-monitor-comandas'
+const URI = 'mongodb://rnzqm-20-7-191-53.a.free.pinggy.link:36607/ephyr-database-monitor-comandas'
 
 console.log(`DB URI: ${URI}`)
 
 mongoose.connect(URI, {
-    useNewUrlParser: true,
-    // useCreateIndex: true,
-    // useFindAndModify: false,
-    useUnifiedTopology: true
+	useNewUrlParser: true,
+	// useCreateIndex: true,
+	// useFindAndModify: false,
+	useUnifiedTopology: true
 })
-    .then(db => console.log('database connected'))
-    .catch(err => console.error(err))
+	.then(db => console.log('database connected'))
+	.catch(err => console.error(err))

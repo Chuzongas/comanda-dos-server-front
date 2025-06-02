@@ -20,6 +20,13 @@ router.get('/all/comandas', auth, async (req, res) => {
 		// Si el usuario es administrador, obtener todas las comandas
 		if (req.userdecode.usuario.admin === true) {
 			comandas = await Comanda.find();
+
+			// FILTRAR, QUITAR LAS TERMINALES VACIAS
+
+			comandas.forEach(comanda => {
+				comanda.data = comanda.data.filter(data => data.terminal !== "")
+			});
+
 		} else {
 			// Obtener las terminales del usuario
 			const terminales = req.userdecode.usuario.terminales;
