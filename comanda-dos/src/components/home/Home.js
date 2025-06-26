@@ -59,37 +59,61 @@ const Home = ({ tokenOptions, reload }) => {
 	// GET COMANDAS INICIALES
 	useEffect(() => {
 
-		//console.log(tokenOptions)
+		////console.log(tokenOptions)
 
 		setSpinner(true)
+		//console.log('to true')
 
 
 		axios.get('api/comanda/all/comandas', tokenOptions)
 			.then(res => {
 
-				for (let i = 0; i < res.data[0].data.length; i++) {
+				if (res.data.length === 0) {
+					setSpinner(false)
+					//console.log('toFalse')
+					setComandas([])
+					setComandasFiltradas([])
+					return
+				}
 
-					var tiposUnicos = res.data[0].data[i].productos.reduce((acc, item) => {
-						if (!acc.some(el => el.movcmdpkt === item.movcmdpkt)) {
-							acc.push({ movcmdpkt: item.movcmdpkt, nompaquete: item.nompaquete });
-						}
-						return acc;
-					}, []);
+				// //console.log(res.data)
 
-					res.data[0].tiposUnicosInfo = tiposUnicos
-					console.log(tiposUnicos)
+				for (let x = 0; x < res.data.length; x++) {
+
+					// console.log(res.data[x])
+
+					for (let i = 0; i < res.data[x].data.length; i++) {
+
+						var tiposUnicos = res.data[x].data[i].productos.reduce((acc, item) => {
+
+							// console.log(acc, item.producto)
+
+							if (!acc.some(el => el.movcmdpkt === item.movcmdpkt)) {
+								// console.log('pushing', res.data)
+								// console.log('pushing', item)
+								// console.log('pushing', item.movcmdpkt, item.nompaquete)
+								acc.push({ movcmdpkt: item.movcmdpkt, nompaquete: item.nompaquete });
+							}
+							return acc;
+						}, []);
+
+					}
+					res.data[x].tiposUnicosInfo = tiposUnicos
+					// console.log(tiposUnicos.length)
 				}
 
 
+
 				setSpinner(false)
+				//console.log('toFalse')
 				setComandas(res.data)
-				console.log(res.data)
 				setComandasFiltradas(res.data)
 				getCentrosYBarras(res.data)
 			})
-			.then(err => {
+			.catch(err => {
 				setSpinner(false)
-				//console.log(err)
+				//console.log('toFalse')
+				////console.log(err)
 			})
 
 	}, [tokenOptions, reload])
@@ -126,27 +150,58 @@ const Home = ({ tokenOptions, reload }) => {
 	const reloadData = () => {
 
 		setSpinner(true)
+		//console.log('to true')
 
 		axios.get('api/comanda/all/comandas', tokenOptions)
 			.then(res => {
 
-				for (let i = 0; i < res.data.length; i++) {
+				//console.log(res.data)
+				//console.log(res.data.length)
 
-					const tiposUnicosOrdenados = [...new Set(res.data[i].data[0].productos.map(item => item.movcmdpkt))];
-					const tiposUnicosOrdenadosNombres = [...new Set(res.data[i].data[0].productos.map(item => item.nompaquete))];
-					res.data[i].paquetesExistentes = tiposUnicosOrdenados
-					res.data[i].paquetesExistentesNombres = tiposUnicosOrdenadosNombres
+				if (res.data.length === 0) {
+					setSpinner(false)
+					//console.log('toFalse')
+					setComandas([])
+					setComandasFiltradas([])
+					return
 				}
 
+				// //console.log(res.data)
 
+				for (let x = 0; x < res.data.length; x++) {
+
+					// console.log(res.data[x])
+
+					for (let i = 0; i < res.data[x].data.length; i++) {
+
+						var tiposUnicos = res.data[x].data[i].productos.reduce((acc, item) => {
+
+							// console.log(acc, item.producto)
+
+							if (!acc.some(el => el.movcmdpkt === item.movcmdpkt)) {
+								// console.log('pushing', res.data)
+								// console.log('pushing', item)
+								// console.log('pushing', item.movcmdpkt, item.nompaquete)
+								acc.push({ movcmdpkt: item.movcmdpkt, nompaquete: item.nompaquete });
+							}
+							return acc;
+						}, []);
+
+					}
+					res.data[x].tiposUnicosInfo = tiposUnicos
+					// console.log(tiposUnicos.length)
+				}
 
 				setSpinner(false)
+				//console.log('toFalse')
 				setComandas(res.data)
-				console.log(res.data)
+				//console.log(res.data)
 				setComandasFiltradas(res.data)
 			})
-			.then(err => {
+			.catch(err => {
 				setSpinner(false)
+				//console.log('toFalse')
+				//console.log(err.response)
 				//console.log(err)
 			})
 	}
@@ -174,14 +229,17 @@ const Home = ({ tokenOptions, reload }) => {
 		}
 
 		setSpinner(true)
+		//console.log('to true')
 		axios.put(`/api/comanda/actualizar/comanda/${comanda}/${terminal}/${movimientoComanda}`, data, tokenOptions)
 			.then(res => {
-				setSpinner(false)
-				//console.log(res.data)
+				// setSpinner(false)
+				//console.log('toFalse')
+				////console.log(res.data)
 				reloadData()
 			})
 			.catch(err => {
 				setSpinner(false)
+				//console.log('toFalse')
 			})
 	}
 	const sendPreparado = (producto, horaPasada, comanda, terminal, movimientoComanda) => {
@@ -199,14 +257,17 @@ const Home = ({ tokenOptions, reload }) => {
 		}
 
 		setSpinner(true)
+		//console.log('to true')
 		axios.put(`/api/comanda/actualizar/comanda/${comanda}/${terminal}/${movimientoComanda}`, data, tokenOptions)
 			.then(res => {
-				setSpinner(false)
-				//console.log(res.data)
+				// setSpinner(false)
+				//console.log('toFalse')
+				////console.log(res.data)
 				reloadData()
 			})
 			.catch(err => {
 				setSpinner(false)
+				//console.log('toFalse')
 			})
 	}
 	const sendEntregado = (producto, horaPasada, comanda, terminal, movimientoComanda) => {
@@ -224,14 +285,17 @@ const Home = ({ tokenOptions, reload }) => {
 		}
 
 		setSpinner(true)
+		//console.log('to true')
 		axios.put(`/api/comanda/actualizar/comanda/${comanda}/${terminal}/${movimientoComanda}`, data, tokenOptions)
 			.then(res => {
-				setSpinner(false)
-				//console.log(res.data)
+				// setSpinner(false)
+				//console.log('toFalse')
+				////console.log(res.data)
 				reloadData()
 			})
 			.catch(err => {
 				setSpinner(false)
+				//console.log('toFalse')
 			})
 	}
 
@@ -257,8 +321,13 @@ const Home = ({ tokenOptions, reload }) => {
 
 	// Función para aplicar los filtros y obtener las comandas filtradas
 	useEffect(() => {
+
+		//console.log('entrando aqui')
+
 		// Copiar las comandas originales para trabajar con ellas
 		let comandasFiltradasTemp = [...comandas];
+
+		//console.log(comandasFiltradasTemp, 'el temp')
 
 		// Aplicar filtro por centro de consumo
 		if (filtroCentroDeConsumo) {
@@ -292,6 +361,8 @@ const Home = ({ tokenOptions, reload }) => {
 			return { ...comanda, data: newData };
 		}).filter(comanda => comanda.data.length > 0); // Eliminar comandas que no tengan elementos en "data" después del filtrado
 
+		//console.log(comandasFiltradasTemp)
+
 		// Establecer las comandas filtradas en el estado
 		setComandasFiltradas(comandasFiltradasTemp);
 
@@ -300,16 +371,19 @@ const Home = ({ tokenOptions, reload }) => {
 	const ocultarComanda = (comanda, terminal) => {
 
 		setSpinner(true)
+		//console.log('to true')
 
 		axios.put(`api/comanda/ocultar/comanda/${comanda._id}/${terminal.terminal}`)
 			.then(res => {
-				setSpinner(false)
-				//console.log(res.data)
+				// setSpinner(false)
+				//console.log('toFalse')
+				////console.log(res.data)
 				reloadData()
 			})
 			.catch(err => {
 				setSpinner(false)
-				//console.log(err)
+				//console.log('toFalse')
+				////console.log(err)
 			})
 	}
 
@@ -479,9 +553,16 @@ const Home = ({ tokenOptions, reload }) => {
 					filtroCancelados ? <h4 style={{ textAlign: 'right' }}>Viendo: <b>cancelados</b></h4> : ''
 				}
 				{
-					comandasFiltradas.map((item, i) => {
+					comandasFiltradas?.map((item, i) => {
+
+						if (item.tiposUnicosInfo === undefined) {
+							return (
+								<p>{item.comanda} no tiene tiposUnicos = {i}</p>
+							)
+						}
+
 						return (
-							item.tiposUnicosInfo.map((paqueteExistente, y) => {
+							item?.tiposUnicosInfo?.map((paqueteExistente, y) => {
 								return (
 									<Fragment key={i + y}>
 
