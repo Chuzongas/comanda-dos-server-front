@@ -15,60 +15,66 @@ router.get('/all/comandas', auth, async (req, res) => {
 		const hace24Horas = new Date(ahora);
 		hace24Horas.setHours(hace24Horas.getHours() - 24);
 
-		let comandas;
+		// Construir el pipeline de agregación
+		const pipeline = [
+			{
+				$addFields: {
+					fechaHora: {
+						$dateFromString: {
+							dateString: {
+								$concat: [
+									{ $concat: ['20', { $substr: ['$fecha', 6, 2] }, '-', { $substr: ['$fecha', 3, 2] }, '-', { $substr: ['$fecha', 0, 2] }] },
+									'T',
+									'$hora'
+								]
+							}
+						}
+					}
+				}
+			},
+			{
+				$match: {
+					fechaHora: { $gte: hace24Horas, $lte: ahora }
+				}
+			}
+		];
 
-		// Si el usuario es administrador, obtener todas las comandas
-		if (req.userdecode.usuario.admin === true) {
-			comandas = await Comanda.find();
-
-			// FILTRAR, QUITAR LAS TERMINALES VACIAS
-
-			comandas.forEach(comanda => {
-				comanda.data = comanda.data.filter(data => data.terminal !== "")
-			});
-
-		} else {
-			// Obtener las terminales del usuario
+		// Si no es admin, filtra por terminales
+		if (!req.userdecode.usuario.admin) {
 			const terminales = req.userdecode.usuario.terminales;
 
-			// Obtener comandas que contengan las terminales
-			comandas = await Comanda.find({
-				'data.terminal': { $in: terminales },
+			// Filtro por terminales dentro de data.terminal
+			pipeline.push({
+				$match: {
+					'data.terminal': { $in: terminales }
+				}
 			});
 		}
 
-		// Filtrar las comandas por fecha y hora en las últimas 24 horas
-		const comandasFiltradas = comandas.map(comanda => {
-			// Filtra las terminales dentro de cada comanda para incluir solo las terminales coincidentes
-			var dataFiltrada
-			if (req.userdecode.usuario.admin === true) {
-				dataFiltrada = comanda.data
-			} else {
-				dataFiltrada = comanda.data.filter(item => req.userdecode.usuario.terminales.includes(item.terminal));
-			}
+		// Ejecutar la agregación
+		let comandas = await Comanda.aggregate(pipeline);
 
-			// Filtrar por la fecha de la comanda
-			const [dia, mes, anio] = comanda.fecha.split('/');
-			const fechaISO = `20${anio}-${mes}-${dia}T${comanda.hora}`;
-			const fechaHoraComanda = new Date(fechaISO);
+		// Limpiar terminales vacías
+		comandas.forEach(comanda => {
+			comanda.data = comanda.data.filter(data => data.terminal !== "");
+		});
 
-			// Verificar si la fecha de la comanda está dentro de las últimas 24 horas
-			if (fechaHoraComanda >= hace24Horas && fechaHoraComanda <= ahora) {
-				return { ...comanda.toObject(), data: dataFiltrada };
-			} else {
-				return null; // Si no está dentro del rango, no incluir la comanda
-			}
-		}).filter(comanda => comanda !== null); // Eliminar las comandas que no cumplen los filtros
+		// Si no es admin, filtra las terminales en cada comanda
+		if (!req.userdecode.usuario.admin) {
+			const terminales = req.userdecode.usuario.terminales;
+			comandas = comandas.map(comanda => {
+				const dataFiltrada = comanda.data.filter(item => terminales.includes(item.terminal));
+				return { ...comanda, data: dataFiltrada };
+			});
+		}
 
 		// Responder con las comandas filtradas
-		return res.json(comandasFiltradas);
+		return res.json(comandas);
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ message: 'Error al obtener las comandas' });
 	}
 });
-
-
 
 // Ruta para crear una nueva comanda
 router.post('/crear/comanda', async (req, res) => {
@@ -330,16 +336,14 @@ router.put('/actualizar/comanda/:comanda/:terminal/:movcmd', auth, async (req, r
 				}
 
 				// SI AL MENOS UN ESTATUS NO TIENE HORA, NO HACER NADA
-				if (terminalData.productos[i].ordenado.hora === undefined ||
-					terminalData.productos[i].cocinando.hora === undefined ||
-					terminalData.productos[i].preparado.hora === undefined ||
-					terminalData.productos[i].entregado.hora === undefined) {
+				if (terminalData.productos[i].entregado.hora === undefined) {
 
 					todoTerminado = false
 
 					break;
 				}
 			}
+			console.log('apoco acaaaaaaaaa')
 			if (todoTerminado) {
 				// OCULTAR LA COMANDA, TODO TERMINADO
 				terminalData.oculto = true
@@ -435,10 +439,7 @@ router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/
 					}
 
 					// SI AL MENOS UN ESTATUS NO TIENE HORA, NO HACER NADA
-					if (varTerminal.productos[i].ordenado.hora === undefined ||
-						varTerminal.productos[i].cocinando.hora === undefined ||
-						varTerminal.productos[i].preparado.hora === undefined ||
-						varTerminal.productos[i].entregado.hora === undefined) {
+					if (varTerminal.productos[i].entregado.hora === undefined) {
 
 						todoTerminado = false
 

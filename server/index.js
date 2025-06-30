@@ -3,6 +3,11 @@ const morgan = require('morgan');
 const path = require('path');
 const cors = require('cors');
 const app = express();
+require('dotenv').config()
+
+const cookieParser = require('cookie-parser')
+
+app.use(cookieParser())
 
 // GLOBAL VARS
 const axiosConfig = require('./axiosConfig/axiosconfig')

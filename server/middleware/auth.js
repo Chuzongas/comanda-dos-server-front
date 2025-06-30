@@ -5,7 +5,7 @@ module.exports = function (req, res, next) {
 
 	try {
 
-		const token = req.header(tokenNameNew)
+		const token =  req.cookies.token
 		if (!token) return res.status(401).json({ messange: 'No token arriba' })
 
 		const decode = jwt.verify(token, config.get('jwtsecret'))

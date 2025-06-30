@@ -16,6 +16,7 @@ import { NameOfToken } from './helpers/Helpers'
 import TokenOptions from './helpers/TokenOptions'
 import Footer from './tools/Footer'
 import Home from './components/home/Home';
+import HomeNew from './components/home/HomeNew';
 
 const App = () => {
 
@@ -93,7 +94,7 @@ const App = () => {
 									<Navbar
 										tokenOptions={tokenOptions}
 									/>
-									<Home
+									<HomeNew
 										reload={reload}
 										tokenOptions={tokenOptions}
 										createAlert={createAlert}

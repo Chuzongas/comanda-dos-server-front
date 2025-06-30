@@ -37,7 +37,12 @@ router.post('/login', [
 			return res.status(401).json({ message: "Credenciales incorrectas" })
 		}
 
-		console.log(usuario.admin === true)
+		const tokenOptions = {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production', // solo HTTPS en prod
+			maxAge: 24 * 60 * 60 * 1000, // 24 horas en ms
+			sameSite: 'lax', // evita CSRF sencillo
+		};
 
 		// CHECK IF ADMIN
 		if (usuario.admin === true) {
@@ -53,18 +58,23 @@ router.post('/login', [
 				}
 			}
 
+
+
 			jwt.sign(
 				payload,
-				config.get('jwtsecret'), { expiresIn: 86400 }, //24 horas
+				process.env.JWT_SECRET,
+				{ expiresIn: 86400 },
 				(err, token) => {
 					if (err) throw err;
+					// Setea cookie con el token
+					res.cookie('token', token, tokenOptions);
 					return res.status(200).json({
-						admin:true,
-						token,
+						admin: usuario.admin === true ? true : undefined,
 						usuario: usuario
-					})
+					});
 				}
 			)
+
 		} else {
 
 			// NO ES ADMIN
@@ -79,13 +89,15 @@ router.post('/login', [
 
 			jwt.sign(
 				payload,
-				config.get('jwtsecret'), { expiresIn: 86400 }, //24 horas
+				process.env.JWT_SECRET,
+				{ expiresIn: 86400 },
 				(err, token) => {
 					if (err) throw err;
+					res.cookie('token', token, tokenOptions);
 					return res.status(200).json({
-						token,
+						admin: usuario.admin === true ? true : undefined,
 						usuario: usuario
-					})
+					});
 				}
 			)
 		}
@@ -131,7 +143,7 @@ router.post('/select/predata', preAuth, [
 
 		jwt.sign(
 			payload,
-			config.get('jwtsecret'), { expiresIn: 86400 }, //24 horas
+			process.env.JWT_SECRET, { expiresIn: 86400 }, //24 horas
 			(err, token) => {
 				if (err) throw err;
 				return res.status(200).json({

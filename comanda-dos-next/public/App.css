@@ -1,0 +1,212 @@
+:root {
+	--font-small: 12px;
+	--radius-standart-value: 5px;
+	--radius-small-value: 5px;
+	--border-size: 1px;
+	--blue-color: #326ef1;
+	--blue-color-light: #4d85ff;
+	--blue-color-opacity: #4f83f333;
+	--green-color: #419E6A;
+	--green-color-light: #5cbc86;
+	--green-color-2: #00b32d;
+	--gray-color: #f0f0f0;
+	--gray-color-opacity: #cbd4e159;
+	--gray-color-2: #363e4a;
+	--gray-color-light: #f5f5f5;
+	--red-color: #D83232;
+	--salmon-color: #FF4754;
+	--salmon-color-light: #ffadb3;
+	--disabled-color: #fafafa78;
+	--cyan-color: #00E6FF;
+	--yellow-color: #FFF000;
+	--dark-blue-color: #000987;
+}
+
+.bgc-gradient-1 {
+	border: 0px;
+	color: white;
+	background: rgb(13, 7, 122);
+	background: linear-gradient(90deg, rgba(13, 7, 122, 1) 0%, rgba(7, 108, 144, 1) 100%);
+}
+
+.gray-grid-header {
+	font-size: 12px;
+	margin: 0px;
+}
+
+.gray-grid-header>p {
+	display: grid;
+	place-content: center;
+	/* width: calc((100% / 11) - ((8px * 10) / 11)); */
+	height: 32px;
+}
+
+.gray-grid {
+	font-size: 12px;
+}
+
+.gray-grid>div {
+	background-color: var(--gray-color);
+	width: calc((100% / 10) - ((8px * 9) / 10));
+	height: 32px;
+	display: grid;
+	place-content: center;
+	border-radius: var(--radius-small-value);
+}
+
+.asignar-grid {
+	font-size: 12px;
+	border-radius: var(--radius-small-value);
+	background-color: var(--gray-color);
+	border: 1px solid var(--gray-color);
+}
+
+.asignar-grid-selected {
+	border: 1px solid var(--green-color) !important;
+}
+
+.the-one {
+	width: calc((100% / 7) - ((2px * 6) / 7));
+}
+
+.asignar-grid {
+	width: 100%;
+	height: 32px;
+	display: grid;
+	place-content: center;
+	border-radius: var(--radius-small-value);
+}
+
+.asignar-grid>.div-grid {
+	width: calc((100% / 9) - ((2px * 8) / 9));
+	height: 30px;
+	position: relative;
+	/* top: -1px; */
+	right: -1px;
+	display: grid;
+	place-content: center;
+}
+
+.popup-select {
+	/* overflow: overlay !important; */
+}
+
+.popup-select>div>div>button {
+	padding: 5px 10px;
+	width: 100%;
+	border-radius: 0px;
+	background-color: transparent;
+}
+
+.new-select {
+	height: 32px;
+	border: 1px solid var(--gray-color-2);
+	border-radius: var(--radius-small-value);
+	padding: 0px 16px 0px 0px;
+}
+
+.new-select p {
+	z-index: 2;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	margin-left: 10px;
+	color: var(--gray-color-2);
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.new-select span {
+	color: var(--gray-color-2);
+	transition: all 0.2s ease;
+	top: 5px;
+	left: 6px;
+	position: absolute;
+	background-color: white;
+	padding: 0px 5px;
+	pointer-events: none;
+}
+
+.new-select .valid {
+	font-size: 12px;
+	top: -8px !important;
+}
+
+
+/* TODO: */
+
+.tarea-limpieza-card-dl {
+	background: rgb(119, 119, 119);
+	background: linear-gradient(71deg, rgba(119, 119, 119, 1) 0%, rgba(161, 161, 161, 1) 100%);
+}
+
+.tarea-limpieza-card-os {
+	background: rgb(156, 15, 15);
+	background: linear-gradient(90deg, rgba(156, 15, 15, 1) 0%, rgba(221, 74, 74, 1) 100%);
+}
+
+.tarea-limpieza-card-ol {
+	background: rgb(47, 112, 17);
+	background: linear-gradient(71deg, rgba(47, 112, 17, 1) 0%, rgba(112, 156, 92, 1) 100%);
+}
+
+.tarea-limpieza-card-bl {
+	background: rgb(7, 125, 138);
+	background: linear-gradient(71deg, rgba(7, 125, 138, 1) 0%, rgba(110, 173, 180, 1) 100%);
+}
+
+.tarea-limpieza-card-ds {
+	background: rgb(142, 135, 20);
+	background: linear-gradient(71deg, rgba(142, 135, 20, 1) 0%, rgba(223, 217, 116, 1) 100%);
+}
+
+.tarea-limpieza-card-fi {
+	background: rgb(24, 31, 121);
+	background: linear-gradient(71deg, rgba(24, 31, 121, 1) 0%, rgba(80, 84, 144, 1) 100%);
+}
+
+.tarea-limpieza-card-color-dl {
+	color: rgb(119, 119, 119);
+}
+
+.tarea-limpieza-card-color-os {
+	color: rgb(156, 15, 15);
+}
+
+.tarea-limpieza-card-color-ol {
+	color: rgb(47, 112, 17);
+}
+
+.tarea-limpieza-card-color-bl {
+	color: rgb(7, 125, 138);
+}
+
+.tarea-limpieza-card-color-ds {
+	color: rgb(142, 135, 20);
+}
+
+.tarea-limpieza-card-color-fi {
+	color: rgb(24, 31, 121);
+}
+
+.item-menu {
+	cursor: pointer;
+	color: var(--gray-color-2);
+}
+
+.item-menu:hover {
+	background-color: var(--blue-color);
+	color: white;
+}
+
+.bgc-green-1 {
+	background-color: #3B9160
+}
+
+.bgc-green-2 {
+	background-color: #358257
+}
+
+.bgc-green-3 {
+	background-color: #2F744D
+}
