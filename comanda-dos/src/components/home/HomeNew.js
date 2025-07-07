@@ -222,7 +222,7 @@ const Home = ({ tokenOptions, reload }) => {
 
 	const getFecha = (item) => {
 		if (item.hora === undefined) {
-			return 'NA'
+			return ''
 		}
 
 		return new Date(item.hora).toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' })
@@ -450,6 +450,9 @@ const Home = ({ tokenOptions, reload }) => {
 
 		if (result) {
 			new Audio(sonidoUno).play()
+				.catch(err => {
+					console.log(err)
+				})
 		}
 	}, [comandas]); // Se ejecuta cada vez que las comandas cambian
 
@@ -615,14 +618,14 @@ const Home = ({ tokenOptions, reload }) => {
 																		</div>
 																		: ''
 																}
-																<div style={{ borderBottomLeftRadius: '0px', borderBottomRightRadius: '0px',backgroundColor: getColorParaId(item.comanda) }} className='py-2 px-3 color-gray-2 radius white'>
+																<div style={{ borderBottomLeftRadius: '0px', borderBottomRightRadius: '0px', backgroundColor: getColorParaId(item.comanda) }} className='py-2 px-3 color-gray-2 radius white'>
 																	<div style={{ display: 'flex', justifyContent: 'space-around', flexDirection: 'column' }}>
 																		<div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between', alignItems: 'center', textAlign: 'center' }}>
 																			<div style={{ display: 'flex', height: '100%', justifyContent: 'space-between', gap: '8px', flexDirection: 'column' }}>
-																				<p >Comanda:{item.comanda}</p>
+																				<p >Comanda: {item.comanda}</p>
 																			</div>
 																			<div style={{ display: 'flex', height: '100%', justifyContent: 'space-between', gap: '8px', flexDirection: 'column' }}>
-																				<p >Mesa:{item.mesa}</p>
+																				<p >Mesa: {item.mesa}</p>
 																			</div>
 																		</div>
 																		<div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between', alignItems: 'center', textAlign: 'center' }}>
@@ -638,11 +641,16 @@ const Home = ({ tokenOptions, reload }) => {
 																				}
 																			</div>
 																			<div style={{ display: 'flex', height: '100%', justifyContent: 'space-between', gap: '8px', flexDirection: 'column' }}>
-																				<p>Hora:{item.hora}</p>
+																				<p>{item.hora}</p>
 																			</div>
 																		</div>
 																	</div>
 																</div>
+																{
+																	barrasDeAlimentos.length > 1 && (
+																		<p className='px-2 mt-2'>Barra: {terminal.terminal}</p>
+																	)
+																}
 																<div className='radius' style={{ display: 'flex', flex: '1' }}>
 																	<div>
 																		<div style={{ display: 'flex', flexDirection: 'column', height: '100%' }} className=' nice-shadow p-2'>
@@ -656,7 +664,7 @@ const Home = ({ tokenOptions, reload }) => {
 																								return (
 																									<Fragment key={p + y + i}>
 																										<div style={{ display: 'flex', gap: '8px', padding: '16px', marginTop: `${p === 0 ? '0px' : '8px'}` }} className={`${producto.cancelado === true ? 'color-red' : ''} radius bgc-gray`}>
-																											{producto.movcmd}
+																											{/* {producto.movcmd} */}
 																											<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 																												{
 																													producto.imagen !== undefined && producto.imagen !== '' ?
@@ -675,10 +683,15 @@ const Home = ({ tokenOptions, reload }) => {
 																														producto.preparacion.map(prep => prep)
 																													}
 																												</p>
+																												<p>Comensal: {producto.comensal}</p>
 																												<div className='' style={{ borderTopLeftRadius: '0px', borderTopRightRadius: '0px' }}>
-																													<span>
-																														<b>Notas:</b> {producto.observaciones}
-																													</span>
+																													{
+																														producto.observaciones && (
+																															<span>
+																																<b>Notas:</b> {producto.observaciones}
+																															</span>
+																														)
+																													}
 																													<div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
 																														{
 																															producto.complementos.map((complemento, i) => {
