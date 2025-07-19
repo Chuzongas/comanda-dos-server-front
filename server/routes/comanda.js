@@ -412,6 +412,7 @@ router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/
 				producto = terminal.productos.find(producto => producto.movcmd == movcmd);
 				if (producto) {
 					varTerminal = terminal
+					break;
 				}
 			}
 
@@ -451,6 +452,8 @@ router.put('/terminar/comanda/:comanda/:cvecc/:movcmd/:mesa/:responsable/:fecha/
 					varTerminal.oculto = true
 				}
 			}
+
+			console.log(comandaEncontrada)
 
 			await comandaEncontrada.save();
 			// return res.json(comandaActualizada);

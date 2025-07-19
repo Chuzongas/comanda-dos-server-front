@@ -2,3 +2,4 @@
 
 ./front/gerencia/node_modules
 .env
+./config

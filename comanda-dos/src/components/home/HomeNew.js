@@ -663,7 +663,7 @@ const Home = ({ tokenOptions, reload }) => {
 
 																								return (
 																									<Fragment key={p + y + i}>
-																										<div style={{ display: 'flex', gap: '8px', padding: '16px', marginTop: `${p === 0 ? '0px' : '8px'}` }} className={`${producto.cancelado === true ? 'color-red' : ''} radius bgc-gray`}>
+																										<div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', padding: '16px', marginTop: `${p === 0 ? '0px' : '8px'}` }} className={`${producto.cancelado === true ? 'color-red' : ''} radius bgc-gray`}>
 																											{/* {producto.movcmd} */}
 																											<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 																												{
@@ -711,7 +711,7 @@ const Home = ({ tokenOptions, reload }) => {
 																											{
 																												producto.cancelado === true ?
 																													<Fragment key={i + y + p + t}>
-																														<div style={{ flexGrow: '4', fontSize: '18px', fontWeight: 'bold' }}>
+																														<div style={{ flexGrow: '4', display: 'grid', placeContent: 'center', fontSize: '18px', fontWeight: 'bold' }}>
 																															<p>Cancelado</p>
 																														</div>
 																													</Fragment>

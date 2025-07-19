@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const URI = 'mongodb://0.0.0.0:27017/ephyr-database-monitor-comandas'
+const URI = 'mongodb://rnxpc-20-7-191-53.a.free.pinggy.link:44379/ephyr-database-monitor-comandas'
 
 console.log(`DB URI: ${URI}`)
 
