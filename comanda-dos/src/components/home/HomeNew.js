@@ -285,7 +285,7 @@ const Home = ({ tokenOptions, reload }) => {
 			})
 	}
 	const sendEntregado = (producto, horaPasada, comanda, terminal, movimientoComanda) => {
-		if (producto.entregado.hora !== undefined) return Promise.resolve();
+		// if (producto.entregado.hora !== undefined) return Promise.resolve();
 
 		let data = {
 			"entregado": {
@@ -461,8 +461,13 @@ const Home = ({ tokenOptions, reload }) => {
 		console.log(paqueteExistente.movcmdpkt);
 		console.log(terminal.productos);
 
+		// return
+
 		const productos = terminal.productos;
 		for (let i = 0; i < productos.length; i++) {
+			if (productos[i].movcmdpkt !== paqueteExistente.movcmdpkt) {
+				continue;
+			}
 			if (i === productos.length - 2) {
 				// Espera a que la penúltima petición termine antes de continuar
 				await sendEntregado(productos[i], productos[i].preparado.hora, item.comanda, terminal.terminal, productos[i].movcmd);
