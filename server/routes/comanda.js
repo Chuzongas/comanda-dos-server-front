@@ -118,7 +118,7 @@ router.post('/crear/comanda', async (req, res) => {
 		const comandaGuardada = await nuevaComanda.save();
 
 		// Enviar la comanda guardada como respuesta
-		res.status(201).json(comandaGuardada);
+		res.status(201).json({ message: `comanda creada con exito ${comandaGuardada._id}` });
 	} catch (error) {
 		// Manejar errores
 		console.log(error);
