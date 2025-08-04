@@ -680,6 +680,7 @@ const Home = ({ tokenOptions, reload }) => {
 																											</div>
 																											<div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' }}>
 																												<p>{producto.producto}</p>
+																												<p>Cantidad: {producto.cantidad}</p>
 																												<p>
 																													{
 																														producto.modificador.map(mod => mod)
